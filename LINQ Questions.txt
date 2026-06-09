@@ -1,0 +1,376 @@
+LINQ
+---
+
+# 📘 LINQ Practice & Examples (C#)
+
+---
+
+# 1️⃣ Basic LINQ – Even Numbers
+
+### Given:
+
+```csharp
+int[] numbers = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+```
+
+### ✅ 1.1 Find Even Numbers
+
+```csharp
+var evensList = numbers
+    .Where(n => n % 2 == 0)
+    .ToList();
+```
+
+---
+
+### ✅ 1.2 Even Numbers + Order Descending
+
+```csharp
+var evens = numbers
+    .Where(n => n % 2 == 0)
+    .OrderByDescending(n => n)
+    .ToList();
+```
+
+---
+
+### ✅ 1.3 Even Numbers + Projection (Multiply by 10)
+
+```csharp
+var evensTimes10 = numbers
+    .Where(n => n % 2 == 0)
+    .Select(n => n * 10)
+    .ToList();
+```
+
+---
+
+# 2️⃣ Select vs SelectMany
+
+### Given:
+
+```csharp
+int[][] numbers =
+{
+    new[] { 1, 2, 3 },
+    new[] { 4, 5 },
+    new[] { 6, 7, 8 }
+};
+```
+
+### Using `Select`
+
+```csharp
+var result = numbers.Select(x => x).ToList();
+```
+
+Output:
+
+```
+[1,2,3]
+[4,5]
+[6,7,8]
+```
+
+---
+
+### Using `SelectMany` (Flattens collection)
+
+```csharp
+var flattened = numbers.SelectMany(x => x).ToList();
+```
+
+Output:
+
+```
+1, 2, 3, 4, 5, 6, 7, 8
+```
+
+---
+
+# 3️⃣ Employee Filtering Example
+
+### Employee Class
+
+```csharp
+class Employee
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Department { get; set; }
+    public int Salary { get; set; }
+}
+```
+
+### Sample Data
+
+```csharp
+var employees = new List<Employee>
+{
+    new Employee { Id = 1, Name = "Alice", Department = "IT", Salary = 60000 },
+    new Employee { Id = 2, Name = "Bob", Department = "HR", Salary = 45000 },
+    new Employee { Id = 3, Name = "Charlie", Department = "IT", Salary = 80000 },
+    new Employee { Id = 4, Name = "David", Department = "IT", Salary = 40000 },
+    new Employee { Id = 5, Name = "Eve", Department = "Finance", Salary = 70000 }
+};
+```
+
+---
+
+## ✅ 3.1 IT Employees with Salary > 50000
+
+Ordered by Salary Descending
+Return Name + Salary
+
+```csharp
+var result = employees
+    .Where(e => e.Department == "IT" && e.Salary > 50000)
+    .OrderByDescending(e => e.Salary)
+    .Select(e => new
+    {
+        e.Name,
+        e.Salary
+    })
+    .ToList();
+```
+
+---
+
+# 4️⃣ Grouping Examples
+
+---
+
+## ✅ 4.1 Group Employees by Department
+
+```csharp
+var grouped = employees
+    .GroupBy(e => e.Department);
+```
+
+---
+
+## ✅ 4.2 Highest Paid Employee Per Department (Single)
+
+```csharp
+var highestPaid = employees
+    .GroupBy(e => e.Department)
+    .Select(g => g.OrderByDescending(e => e.Salary).First())
+    .ToList();
+```
+
+---
+
+## ✅ 4.3 Count Employees Per Department
+
+```csharp
+var departmentCounts = employees
+    .GroupBy(e => e.Department)
+    .Select(g => new
+    {
+        Department = g.Key,
+        Count = g.Count()
+    })
+    .ToList();
+```
+
+---
+
+# 5️⃣ Highest Paid Employees Per Department (Handle Ties)
+
+### Updated Data
+
+```csharp
+var employees = new List<Employee>
+{
+    new Employee { Id = 1, Name = "Alice", Department = "IT", Salary = 60000 },
+    new Employee { Id = 2, Name = "Bob", Department = "HR", Salary = 45000 },
+    new Employee { Id = 3, Name = "Charlie", Department = "IT", Salary = 80000 },
+    new Employee { Id = 4, Name = "David", Department = "IT", Salary = 60000 },
+    new Employee { Id = 5, Name = "Eve", Department = "Finance", Salary = 70000 },
+    new Employee { Id = 6, Name = "Frank", Department = "HR", Salary = 60000 }
+};
+```
+
+---
+
+## ✅ Highest Paid Employees (Handle Same Salary)
+
+```csharp
+var data = employees
+    .GroupBy(e => e.Department)
+    .SelectMany(g =>
+    {
+        var maxSalary = g.Max(e => e.Salary);
+
+        return g
+            .Where(e => e.Salary == maxSalary)
+            .Select(e => new
+            {
+                Department = g.Key,
+                e.Name,
+                e.Salary
+            });
+    })
+    .ToList();
+```
+
+---
+
+## ✅ Only ONE Highest Paid Per Department
+
+```csharp
+var result = employees
+    .GroupBy(e => e.Department)
+    .Select(g => g.OrderByDescending(e => e.Salary).First())
+    .ToList();
+```
+
+---
+
+# 6️⃣ Filtering Example – Person
+
+### Class
+
+```csharp
+class Person
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public string City { get; set; }
+}
+```
+
+### Task
+
+People:
+
+* Age > 25
+* City = London
+* Return Name + Age
+
+```csharp
+var data = people
+    .Where(x => x.Age > 25 && x.City == "London")
+    .Select(x => new
+    {
+        x.Name,
+        x.Age
+    })
+    .ToList();
+```
+
+---
+
+# 7️⃣ Orders – Grouping + Aggregation
+
+### Order Class
+
+```csharp
+class Order
+{
+    public int OrderId { get; set; }
+    public int CustomerId { get; set; }
+    public decimal Amount { get; set; }
+}
+```
+
+---
+
+## ✅ Group Orders by Customer
+
+Requirements:
+
+* CustomerId
+* Total order amount
+* Number of orders
+* Only include customers with total > 1000
+
+```csharp
+var data = orders
+    .GroupBy(x => x.CustomerId)
+    .Where(g => g.Sum(x => x.Amount) > 1000)
+    .Select(g => new
+    {
+        CustomerId = g.Key,
+        TotalAmount = g.Sum(x => x.Amount),
+        Orders = g.Count()
+    })
+    .ToList();
+```
+
+---
+
+# 8️⃣ Join Example – Customers + Orders
+
+### Customer Class
+
+```csharp
+class Customer
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+```
+
+---
+
+## ✅ Join + Group + Total Amount
+
+```csharp
+var data = customers
+    .Join(
+        orders,
+        c => c.Id,
+        o => o.CustomerId,
+        (c, o) => new { c.Name, o.Amount }
+    )
+    .GroupBy(x => x.Name)
+    .Select(g => new
+    {
+        CustomerName = g.Key,
+        TotalOrderAmount = g.Sum(x => x.Amount)
+    })
+    .ToList();
+```
+
+---
+
+## ✅ Alternative – Using GroupJoin
+
+```csharp
+var data = customers
+    .GroupJoin(
+        orders,
+        c => c.Id,
+        o => o.CustomerId,
+        (c, os) => new
+        {
+            CustomerName = c.Name,
+            TotalOrderAmount = os.Sum(o => o.Amount)
+        }
+    )
+    .Where(x => x.TotalOrderAmount > 0)
+    .ToList();
+```
+
+---
+
+# 🎯 Topics Covered
+
+✔ Where
+✔ Select
+✔ SelectMany
+✔ OrderBy / OrderByDescending
+✔ GroupBy
+✔ Sum
+✔ Count
+✔ Max
+✔ Join
+✔ GroupJoin
+✔ Projection
+✔ Handling Ties
+✔ Aggregation
+
+---
+ 

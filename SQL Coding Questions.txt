@@ -1,0 +1,487 @@
+
+
+SQL Coding Questions
+------------------
+---------- 1. Second Highest Salary ----------
+
+	if object_id('tempdb..#Employee') is not null
+		drop table #Employee
+
+	Create table #Employee
+	(
+		Srno int identity(1,1),
+		Name varchar(150),
+		Salary Numeric(15,0)
+	)
+
+	Insert into #Employee(name,Salary)
+	values('Anurag',50000),
+	('Abhiram',60000),
+	('Sid',70000),
+	('Satish',70000),
+	('Sagar',90000)
+
+	select * from #Employee
+
+	----Approach 1----------
+	select max(salary) as secondhighestsalary
+	from #Employee
+	where salary < (select max(salary) from #Employee) 
+
+	----Approach 2----------
+	;with cte as (
+		select salary,DENSE_RANK() over(order by salary desc) as rnk
+		from #Employee
+	)
+	select top 1 salary as secondhighestsalary
+	from cte 
+	where rnk = 2
+
+	----Approach 3----------
+	select top 1 t.salary
+	from
+	(
+		select salary,DENSE_RANK()over(order by salary desc) as rnk
+		from #Employee
+	) t
+	where t.rnk=2
+	 
+	-- DENSE_RANK() approach is better because it is scalable, reusable for Nth highest, and handles grouping scenarios.
+	-- The MAX subquery is only suitable for 2nd highest and not flexible.
+
+	-- For fixed problems like second highest salary MAX works,
+	-- but in real-world applications we always prefer window functions like DENSE_RANK because they are scalable, maintainable and performant.
+
+
+------------------------------ ------------------------------  ------------------------------
+
+----------2. Employees earning more than Manager-------------------------
+
+	if object_id('tempdb..#Employee') is not null
+		drop table #Employee
+
+	Create table #Employee (
+		EmpId int,
+		Name varchar(150),
+		Salary Numeric(15,0),
+		ManagerId int
+	)
+
+	insert into #Employee(EmpId,name,salary,managerid) values(1,'Anurag',40000,4),
+	(2,'Abhiram',60000,4),
+	(3,'Sid',50000,null),
+	(4,'Satish',45000,null),
+	(5,'Sagar',90000,3),
+	(6,'Raj',40000,3)
+
+
+	select * from #Employee
+	
+	--approach 1
+
+	;with cte as(
+		select empid,name,salary
+		from #Employee
+		where ManagerId is null
+	)
+
+	select e.name,e.salary
+	from #Employee e
+	join cte c on c.EmpId=e.ManagerId
+	where e.Salary>c.Salary
+
+	--approach 2
+	SELECT  emp.Name  AS Employee,
+	emp.Salary AS EmployeeSalary,
+	mgr.Name  AS Manager,
+	mgr.Salary AS ManagerSalary
+	FROM #Employee emp 
+	JOIN #Employee mgr ON emp.ManagerId = mgr.EmpId
+	WHERE emp.Salary > mgr.Salary; 
+	 
+-----------------------------------------------------------------------------------------------------------------------
+-----------------3. Duplicate Records  - Find duplicate emails --------------------
+
+
+	if object_id('tempdb..#Customer') is not null
+		drop table #Customer
+
+
+	create table #Customer(
+		srno int identity(1,1),
+		CustomerName varchar(100),
+		EmailId varchar(150)
+	)
+
+	INSERT INTO #Customer(CustomerName, EmailId)
+	VALUES
+	('Anurag','anurag@gmail.com'),
+	('Abhiram','abhiram@gmail.com'),
+	('Sid','sid@gmail.com'),
+	('Satish','satish@gmail.com'),
+	('Sagar','sagar@gmail.com'),
+	('Raj','raj@gmail.com'),
+	('Rohit','rohit@gmail.com'),
+	('Amit','amit@gmail.com'),
+	-- duplicate emails
+	('Anu','anurag@gmail.com'),
+	('Sidhu','sid@gmail.com'),
+	('Sagar2','sagar@gmail.com'),
+	('Raj2','raj@gmail.com');
+
+
+	select * from #Customer
+
+	--Approach 1
+	;with cte as (
+		select CustomerName,emailid,ROW_NUMBER()over(partition by emailid order by customername) as duplicate
+		from #Customer
+	)
+
+	select * from cte 
+	where duplicate>1
+
+	--Approach 2
+	SELECT EmailId, COUNT(*) AS Total
+	FROM #Customer
+	GROUP BY EmailId
+	HAVING COUNT(*) > 1;
+
+-----------Remove Duplicate Records (keep latest id)----------- 
+
+
+	select * from #Customer
+	
+	--Approach 1
+
+	;with cte2 as (
+		select srno, CustomerName,emailid,ROW_NUMBER()over(partition by emailid order by srno desc) as duplicate
+		from #Customer
+	)
+
+	delete from #Customer where srno in (select srno from cte2 where duplicate>1)
+
+	--Approach 2
+	
+	;WITH cte2 AS (
+		SELECT srno, CustomerName, emailid,
+			   ROW_NUMBER() OVER(PARTITION BY emailid ORDER BY srno DESC) AS duplicate
+		FROM #Customer
+	)
+	DELETE FROM cte2
+	WHERE duplicate > 1;
+
+	--CTE is not a physical object. It is a query expression. When we delete from a CTE, SQL Server actually deletes rows from the underlying base table identified by the CTE.
+
+
+---------------4. Consecutive Numbers (appears 3 times in a row)---------------
+
+	IF OBJECT_ID('tempdb..#Logs') IS NOT NULL
+		DROP TABLE #Logs;
+
+	CREATE TABLE #Logs
+	(
+		Id  INT,
+		Num INT
+	);
+
+	INSERT INTO #Logs (Id, Num) VALUES
+	(1,1),
+	(2,1),
+	(3,1),
+	(4,2),
+	(5,1),
+	(6,2),
+	(7,2),
+	(8,2),
+	(9,3);
+
+	SELECT * FROM #Logs;
+
+	SELECT DISTINCT Num
+	FROM (
+		SELECT Num,
+			   LAG(Num,1) OVER(ORDER BY Id) AS prev1,
+			   LAG(Num,2) OVER(ORDER BY Id) AS prev2
+		FROM #Logs
+	) t
+	WHERE Num = prev1
+	  AND Num = prev2;
+
+	SELECT DISTINCT Num
+	FROM (
+		SELECT Num,
+			   LEAD(Num,1) OVER(ORDER BY Id) AS next1,
+			   LEAD(Num,2) OVER(ORDER BY Id) AS next2
+		FROM #Logs
+	) t
+	WHERE Num = next1
+	  AND Num = next2;
+
+	-- LAG() Look backward (previous row)
+	-- LEAD() Look forward (next row)
+	-- LAG(column, offset, default_value) OVER(ORDER BY column)
+	-- LEAD(column, offset, default_value) OVER(ORDER BY column)
+	-- offset = how many rows away
+	-- default_value = if row not available (optional)
+
+-------5. Highest Salary in Each Department
+
+	IF OBJECT_ID('tempdb..#EmployeeDept') IS NOT NULL
+		DROP TABLE #EmployeeDept;
+
+	CREATE TABLE #EmployeeDept
+	(
+		Id INT,
+		Name VARCHAR(50),
+		Salary INT,
+		Dept VARCHAR(20)
+	);
+
+	INSERT INTO #EmployeeDept (Id, Name, Salary, Dept) VALUES
+	(1,'A',50000,'HR'),
+	(2,'B',60000,'HR'),
+	(3,'C',70000,'IT'),
+	(4,'D',80000,'IT'),
+	(5,'E',60000,'HR');
+
+	SELECT * FROM #EmployeeDept;
+
+	--Approach 1
+	;with cte as(
+		select id,name,salary,dept,DENSE_RANK()over(partition by dept order by salary desc) as rnk
+		from #EmployeeDept 
+	)
+
+	select * from cte
+	where rnk=1
+
+	--approach 2
+	;with cte as(
+		select id,name,salary,dept,row_number()over(partition by dept order by salary desc) as rnk
+		from #EmployeeDept 
+	)
+
+	select * from cte
+	where rnk=1
+
+
+-------6. Top 3 Salaries in Each Department
+
+	IF OBJECT_ID('tempdb..#EmployeeDept') IS NOT NULL
+		DROP TABLE #EmployeeDept;
+
+	CREATE TABLE #EmployeeDept
+	(
+		Id INT,
+		Name VARCHAR(50),
+		Salary INT,
+		Dept VARCHAR(20)
+	);
+
+	INSERT INTO #EmployeeDept (Id, Name, Salary, Dept) VALUES
+	-- HR (5 records)
+	(1,'A',50000,'HR'),
+	(2,'B',60000,'HR'),
+	(3,'C',55000,'HR'),
+	(4,'D',60000,'HR'),
+	(5,'E',70000,'HR'),
+
+	-- IT (5 records)
+	(6,'F',70000,'IT'),
+	(7,'G',80000,'IT'),
+	(8,'H',75000,'IT'),
+	(9,'I',80000,'IT'),
+	(10,'J',72000,'IT'),
+
+	-- Finance (2 records)
+	(11,'K',65000,'Finance'),
+	(12,'L',68000,'Finance');
+
+	SELECT * FROM #EmployeeDept;
+
+	
+	--Approach 1
+	;WITH SalaryRank AS
+	(
+		SELECT *,
+			   DENSE_RANK() OVER(PARTITION BY Dept ORDER BY Salary DESC) AS rnk
+		FROM #EmployeeDept
+	)
+	SELECT *
+	FROM SalaryRank
+	WHERE rnk <= 3
+	ORDER BY Dept, Salary DESC;
+
+
+
+-------7. Find Employees Joined in Last 7 Days
+	IF OBJECT_ID('tempdb..#EmpJoin') IS NOT NULL
+		DROP TABLE #EmpJoin;
+
+	CREATE TABLE #EmpJoin
+	(
+		Id INT,
+		Name VARCHAR(50),
+		JoinDate DATE
+	);
+
+
+	INSERT INTO #EmpJoin (Id, Name, JoinDate) VALUES
+	-- Older employees
+	(1,'Amit','2024-11-01'),
+	(2,'Rahul','2024-11-10'),
+	(3,'Sneha','2024-12-05'),
+	(4,'Priya','2024-12-18'),
+	(5,'Vikram','2025-01-01'),
+	(6,'Neha','2025-01-10'),
+	(7,'Rohit','2025-01-15'),
+	(8,'Pooja','2025-01-20'),
+	(9,'Karan','2025-01-25'),
+	(10,'Meena','2025-01-30'),
+
+	-- Last 7 days employees
+	(11,'Arjun', CAST(GETDATE()-1 AS DATE)),
+	(12,'Isha',  CAST(GETDATE()-2 AS DATE)),
+	(13,'Nikhil',CAST(GETDATE()-3 AS DATE)),
+	(14,'Komal', CAST(GETDATE()-4 AS DATE)),
+	(15,'Sagar', CAST(GETDATE()-5 AS DATE)),
+	(16,'Riya',  CAST(GETDATE()-6 AS DATE)),
+	(17,'Tina',  CAST(GETDATE()-7 AS DATE)),
+	(18,'Varun', CAST(GETDATE() AS DATE)),
+	(19,'Deepak',CAST(GETDATE()-1 AS DATE)),
+	(20,'Anjali',CAST(GETDATE()-2 AS DATE));
+
+	
+	SELECT * FROM #EmpJoin  
+
+	SELECT *
+	FROM #EmpJoin
+	WHERE JoinDate >= DATEADD(DAY,-7,CAST(GETDATE() AS DATE))
+	ORDER BY JoinDate;
+
+
+
+--------8.Display each customer's sales month-wise like a report:
+
+	IF OBJECT_ID('tempdb..#Sales') IS NOT NULL
+		DROP TABLE #Sales;
+
+	CREATE TABLE #Sales
+	(
+		CustomerName VARCHAR(50),
+		SaleDate DATE,
+		Amount INT
+	);
+	INSERT INTO #Sales VALUES
+	('Anurag','2026-01-05',5000),
+	('Anurag','2026-02-10',7000),
+	('Anurag','2026-03-12',3000),
+
+	('Rahul','2026-01-08',2000),
+	('Rahul','2026-02-15',4000),
+	('Rahul','2026-03-20',9000),
+
+	('Sneha','2026-01-10',6000),
+	('Sneha','2026-02-18',2000),
+	('Sneha','2026-03-25',1000);
+
+	select * from #Sales
+
+	SELECT *
+	FROM
+	(
+		SELECT CustomerName,
+			   DATENAME(MONTH,SaleDate) AS MonthName,
+			   Amount
+		FROM #Sales
+	) src
+	PIVOT
+	(
+		SUM(Amount)
+		FOR MonthName IN ([January],[February],[March])
+	) p;
+
+------------9. Find employees who have the same salary
+
+	IF OBJECT_ID('tempdb..#EmpSalary') IS NOT NULL
+		DROP TABLE #EmpSalary;
+
+	CREATE TABLE #EmpSalary
+	(
+		Id INT,
+		Name VARCHAR(50),
+		Salary INT
+	);
+
+	INSERT INTO #EmpSalary VALUES
+	(1,'Amit',50000),
+	(2,'Rahul',60000),
+	(3,'Sneha',50000),
+	(4,'Pooja',70000),
+	(5,'Karan',60000),
+	(6,'Neha',80000);
+
+	SELECT *
+	FROM #EmpSalary
+	WHERE Salary IN (
+		SELECT Salary
+		FROM #EmpSalary
+		GROUP BY Salary
+		HAVING COUNT(*) > 1
+	);
+
+	SELECT *
+	FROM (
+		SELECT *,
+			   COUNT(*) OVER(PARTITION BY Salary) AS cnt
+		FROM #EmpSalary
+	) t
+	WHERE cnt > 1;
+
+	;WITH cte AS (
+		SELECT name,salary,
+			   COUNT(*) OVER(PARTITION BY salary) AS cnt
+		FROM #EmpSalary
+	)
+	SELECT *
+	FROM cte
+	WHERE cnt > 1;
+
+--------9. Find employees earning more than their department’s average salary
+
+	IF OBJECT_ID('tempdb..#EmployeeDept') IS NOT NULL
+		DROP TABLE #EmployeeDept;
+
+	CREATE TABLE #EmployeeDept
+	(
+		Id INT,
+		Name VARCHAR(50),
+		Salary INT,
+		Dept VARCHAR(20)
+	);
+
+	INSERT INTO #EmployeeDept (Id, Name, Salary, Dept) VALUES
+	(1,'A',50000,'HR'),
+	(2,'B',60000,'HR'),
+	(3,'C',55000,'HR'),
+	(4,'D',70000,'HR'),
+
+	(5,'E',80000,'IT'),
+	(6,'F',75000,'IT'),
+	(7,'G',72000,'IT'),
+	(8,'H',65000,'IT'),
+
+	(9,'I',40000,'Finance'),
+	(10,'J',45000,'Finance'),
+	(11,'K',42000,'Finance');
+
+
+	SELECT *
+FROM (
+    SELECT *,
+           AVG(Salary) OVER(PARTITION BY Dept) AS DeptAvg
+    FROM #EmployeeDept
+) t
+WHERE Salary > DeptAvg;
+

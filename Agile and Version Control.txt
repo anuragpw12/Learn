@@ -1,0 +1,526 @@
+Agile and Version Control
+---------------------------------------------------------------------------------------------------------------------------------------
+Agile
+
+=> Meaning – Development methodology focused on iterative delivery and continuous feedback.
+=> Why – Adapt quickly to changing requirements.
+=> Where – Modern software teams.
+=> Example – Building product step-by-step instead of all at once.
+=> Note – Customer collaboration over documentation.
+
+Scrum
+
+=> Meaning – Agile framework that manages work in time-boxed sprints.
+=> Why – Organize and track team progress.
+=> Where – Most Agile teams.
+=> Example – Short work cycles with review meetings.
+=> Note – Uses roles like Product Owner & Scrum Master.
+
+5 member team 
+1 dotnet senior
+1 jr dotnet
+1 mobile 
+1 qa
+1 mangager
+
+Sprint
+
+=> Meaning – Fixed time period (usually 2 weeks) to complete tasks.
+=> Why – Deliver features incrementally.
+=> Where – Scrum process.
+=> Example – Mini project deadline.
+=> Note – Ends with review and retrospective.
+
+Product Backlog
+
+=> Meaning – Prioritized list of features and requirements.
+=> Why – Organize upcoming work.
+=> Where – Managed by Product Owner.
+=> Example – Task wishlist.
+=> Note – Continuously updated.
+
+User Story
+
+=> Meaning – Requirement written from user perspective.
+=> Why – Focus on business value.
+=> Where – Backlog items.
+=> Example – “As a customer, I want to track shipment.”
+=> Note – Small and testable.
+
+Story Points
+
+=> Meaning – Relative effort estimation.
+=> Why – Plan sprint capacity.
+=> Where – Sprint planning.
+=> Example – Easy = 2, Medium = 5, Hard = 8.
+=> Note – Not time-based.
+
+Daily Standup
+
+=> Meaning – 15-minute daily sync meeting.
+=> Why – Share progress and blockers.
+=> Where – Scrum teams.
+=> Example – What I did, what I will do, blockers.
+=> Note – Short and focused.
+
+Sprint Review
+
+=> Meaning – Demo completed work to stakeholders.
+=> Why – Get feedback.
+=> Where – End of sprint.
+=> Example – Feature demonstration meeting.
+=> Note – Customer validation.
+
+Sprint Retrospective
+
+=> Meaning – Team improvement discussion.
+=> Why – Improve process each sprint.
+=> Where – After review.
+=> Example – What went well, what didn’t.
+=> Note – Internal meeting.
+
+Definition of Done
+
+=> Meaning – Criteria to mark task complete.
+=> Why – Maintain quality.
+=> Where – Team agreement.
+=> Example – Code reviewed + tested + deployed.
+=> Note – Prevents partial completion.
+
+Velocity
+
+=> Meaning – Work completed per sprint.
+=> Why – Predict future capacity.
+=> Where – Sprint planning.
+=> Example – Team completes 30 points each sprint.
+=> Note – Improves planning accuracy.
+
+Burndown Chart
+
+=> Meaning – Graph of remaining work vs time.
+=> Why – Track sprint progress.
+=> Where – Scrum boards.
+=> Example – Downward line toward zero.
+=> Note – Shows delays early.
+
+Backlog Grooming
+
+=> Meaning – Refining and prioritizing backlog.
+=> Why – Keep tasks ready for next sprint.
+=> Where – Pre-planning meetings.
+=> Example – Cleaning task list.
+=> Note – Also called refinement.
+
+Technical Debt
+
+=> Meaning – Future cost due to shortcuts in code.
+=> Why – Quick fixes create maintenance burden.
+=> Where – Legacy code.
+=> Example – Temporary patch becoming permanent.
+=> Note – Must be repaid later.
+
+CI/CD
+
+=> Meaning – Automated build, test and deployment pipeline.
+=> Why – Faster and safer releases.
+=> Where – DevOps workflow.
+=> Example – Code push → auto deploy.
+=> Note – Continuous delivery.
+
+MVP (Minimum Viable Product)
+
+=> Meaning – Basic version with core features only.
+=> Why – Validate idea early.
+=> Where – Product launch phase.
+=> Example – First working prototype.
+=> Note – Add features later.
+
+Stakeholder
+
+=> Meaning – Person interested in product outcome.
+=> Why – Provides business requirements.
+=> Where – Reviews and planning.
+=> Example – Client or business manager.
+=> Note – Not always technical.
+
+Kanban
+
+=> Meaning – Agile method without sprints focusing on continuous flow.
+=> Why – Flexible work management.
+=> Where – Support teams.
+=> Example – To-do → Doing → Done board.
+=> Note – No time-boxing.
+
+Impediment
+
+=> Meaning – Blocker preventing progress.
+=> Why – Must be removed quickly.
+=> Where – Daily standup discussions.
+=> Example – Waiting for API access.
+=> Note – Scrum Master resolves it.
+
+Cross-functional Team
+
+=> Meaning – Team with developers, QA and operations together.
+=> Why – Deliver features independently.
+=> Where – Agile teams.
+=> Example – Full product team.
+=> Note – No external dependency.
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+Version Control (Git)
+
+=> Meaning – Git tracks changes in code and allows multiple developers to work together safely.
+=> Why – Maintain history, collaboration and rollback capability.
+=> Where – All software development projects.
+=> Example – Google Docs version history for code.
+=> Note – Uses local and remote repositories.
+
+Basic Commands
+
+	git clone <url>
+	=> Copy remote repository to local machine.
+
+	git add .
+	=> Stage changes before commit.
+
+	git commit -m "msg"
+	=> Save changes locally.
+
+	git push
+	=> Upload commits to remote repository.
+
+	git pull
+	=> Fetch + merge latest changes from remote.
+
+	git fetch
+	=> Download changes without merging. 
+	Download remote updates safely
+
+	git checkout <branch>
+	=> Switch branch.
+	new way git switch <branch>
+
+Branch & History Management
+
+	git merge
+	=> Combine one branch into another.
+
+	git rebase
+	=> Rewrite commit history to keep linear timeline.
+
+	git cherry-pick <hash>
+	=> Apply a specific commit to another branch.
+
+	git log --oneline
+	=> Show commit history in short format.
+
+Undo & Temporary Work
+
+	git stash
+	=> Temporarily save uncommitted changes.
+
+	git reset
+	=> Move HEAD to previous commit (history rewrite).
+
+	git revert
+	=> Safely undo a commit by creating a new commit.
+
+
+
+Practice steps -
+1.Create dummy project 
+	- add some files
+
+2.Initialize git in project	
+	- git init = You now created: Initialized empty Git repository in E:/Git Practice/CourierManagementSystem/.git/
+
+3.First Commit
+	- git status
+	
+	- git add .
+		- faced issue as permission denied 
+			-> so created gitingore file added some lines 
+			-> git rm -r --cached .vs
+			
+		- still not solved so it worked on "VS Code"
+		
+	- git commit -m "Initial project setup"  (Your computer (local repository))
+	
+4.Create GitHub Remote Repository
+	- Creat repo in github courier-git-practice
+	- git remote add origin https://github.com/AnuragRo45/courier-git-practice.git
+	- git branch -M main
+	- git push -u origin main
+
+5.Now Create enviormnet - 3 developers 
+	- git clone <repo-url> dev1
+	- clone and create folder 
+	- eg. -  git clone https://github.com/AnuragRo45/courier-git-practice.git dev1
+
+6.Configure Developers
+	- Inside each folder: 
+		git config user.name "Rahul"
+		git config user.email "rahul@test.com"
+	
+7.Scenario 1
+	- git switch -c feature/login = modern Git prefers
+	- earlier git checkout -b feature/login
+	- -c means create
+	
+	- Developer 1 (Feature Work)
+
+		Inside dev1:
+			git switch -c feature/login
+		Edit:
+			app.txt
+		Add:
+			Login Feature Added
+		Then:
+			git add .
+			git commit -m "Added login feature"
+			git push origin feature/login
+			Developer 2 (Fetch Work)
+
+		Inside dev2: 
+			git fetch
+			git checkout feature/login
+
+			Add new line in app.txt:
+				Login validation added
+				Commit + push.
+				
+
+8.Scenario 2 : MERGE CONFLICT
+	✅ STEP 0 — Starting Condition (VERY IMPORTANT)
+
+		Both dev1 and dev2 must be updated.
+
+		Inside dev1:
+
+		git checkout main
+		git pull
+
+		Inside dev2:
+
+		git checkout main
+		git pull
+
+		Now both have SAME code.
+
+
+
+	✅ STEP 1 — Create File to Cause Conflict
+
+		Inside dev1:
+
+		Open:
+
+		orders/orders.txt
+
+		Add:
+
+		Order Status: Pending
+
+		Save.
+
+		Commit:
+
+		git add .
+		git commit -m "Added order status pending"
+		git push
+
+		✅ Remote updated.
+  
+
+	✅ STEP 2 — Dev2 Pull Latest (Important)
+
+		Inside dev2:
+
+		git pull
+
+		Now both repos again same.
+
+
+
+		✅ STEP 3 — BOTH Developers Edit SAME LINE
+
+		🔥 This is where conflict is created.
+
+
+
+		Dev1 Change
+
+		Inside dev1 edit:
+
+		Order Status: Processing
+
+		Commit:
+
+		git add .
+		git commit -m "Changed status to Processing"
+
+		⚠️ DO NOT PUSH YET.
+
+
+
+		Dev2 Change (Different Change Same Line)
+
+		Inside dev2 edit SAME line:
+
+		Order Status: Cancelled
+
+		Commit + Push:
+
+		git add .
+		git commit -m "Changed status to Cancelled"
+		git push
+
+		✅ Remote now has Dev2 change.
+
+
+
+	✅ STEP 4 — Dev1 Push (Conflict Happens)
+
+		Now Dev1 tries:
+
+		git push
+
+		Git says:
+
+		! rejected
+		Updates were rejected because remote contains work that you do not have locally.
+
+		Meaning:
+
+		👉 Someone pushed before you.
+
+
+
+	✅ STEP 5 — Dev1 Pull Latest Changes
+
+		Dev1 runs:
+
+		git pull
+
+		💥 BOOM — Conflict appears.
+
+		You will see:
+
+		CONFLICT (content): Merge conflict in orders.txt
+		Automatic merge failed
+
+
+
+	✅ STEP 6 — See Conflict File
+
+		Open:
+
+		orders.txt
+
+		You will see:
+
+		<<<<<<< HEAD
+		Order Status: Processing
+		=======
+		Order Status: Cancelled
+		>>>>>>> branch-name
+
+
+
+		What This Means
+
+		Symbol
+
+		Meaning
+
+		<<<<<<< HEAD
+
+		Your change (Dev1)
+
+		=======
+
+		Separator
+
+		>>>>>>>
+
+		Incoming change (Dev2)
+
+
+
+	✅ STEP 7 — Resolve Conflict (Manual Decision)
+
+		You must decide final code.
+
+		Example:
+
+		Order Status: Processing and Cancelled review needed
+
+		OR choose one:
+
+		Order Status: Processing
+
+		Remove ALL markers:
+
+		<<<<<<<
+		=======
+		>>>>>>>
+
+		File should look clean.
+
+		Save file.
+
+
+
+	✅ STEP 8 — Tell Git Conflict is Resolved
+
+		git add orders/orders.txt
+
+		Check:
+
+		git status
+
+		You should see:
+
+		All conflicts fixed but you are still merging
+
+
+
+	✅ STEP 9 — Complete Merge Commit
+
+		git commit -m "Resolved merge conflict between processing and cancelled status"
+
+
+
+		✅ STEP 10 — Push Final Code
+
+		git push
+
+		✅ Conflict resolved successfully.
+
+
+
+		🎯 What Just Happened (REAL UNDERSTANDING)
+
+		Timeline:
+
+		Dev1 change ----\
+		                 ---> CONFLICT ---> Manual decision
+		Dev2 change ----/
+
+		Git cannot decide automatically → human must decide.
+
+
+
+		✅ Verify History
+
+		Run:
+
+		git log --oneline --graph
+
+
+	
+	
+	
+	

@@ -1,0 +1,4287 @@
+OOP - 
+
+30.Why OOP?
+	- Procedural programming doesn’t scale well for large systems.OOP improves maintainability, extensibility, 
+	  encapsulation, and testability by binding data with behavior and modeling real-world entities.	
+	  
+	- Object-Oriented Programming (OOP) is a programming paradigm that designs software using objects,
+   	  which represent real-world entities, and uses classes to encapsulate data (state) and behavior (methods) 
+	  together to improve modularity, reusability, scalability, and maintainability.
+	  
+31.Class = idea
+	- A class is a blueprint that defines the data and behavior of objects.
+	  
+32.Object = reality
+	- An object is an instance of a class that represents a real entity in memory.
+	- It occupies memory and represents a real-world entity. 
+	
+eg. - Shipment s1 = new Shipment();
+	- Shipment class = Loaded once in memory (metadata area)
+	- new Shipment() = Object created in heap
+	- s1 = Reference stored in stack
+	  
+- Getter and Setter are properties used to control access of private fields and implement encapsulation in C#.
+
+28. Encapsulation - Encapsulation hides data
+	- Encapsulation is the bundling of data and methods together and restricting direct access to data to protect object state.
+	- eg . Balance - private property
+	
+	
+29. Abstraction - Abstraction hides complexity	  
+	- Abstraction is the process of exposing only essential features while hiding implementation details.
+	- An abstract class is a base class that supports partial implementation by allowing both abstract and concrete methods along with shared state.
+	- Abstraction is implemented using:
+		Interfaces
+		Abstract classes
+	- eg Customer Perspective
+		Book shipment
+		Track shipment
+		Cancel shipment
+		Customer does not care:
+
+		How price is calculated
+			Which DB is used
+			Which API is called
+			
+33.Inheritance (Reuse with Responsibility)	  
+	- Inheritance is an OOP concept where a class derives properties and behaviors from another class.
+	- C# supports single, multilevel, and hierarchical inheritance through classes, 
+	  and supports multiple and hybrid inheritance through interfaces to avoid ambiguity and runtime complexity.
+	
+	❓ Does C# support multiple inheritance?
+	✅ Classes: ❌ No
+	✅ Interfaces: ✔ Yes
+	
+	❓ Can constructor be virtual?
+	❌ No (CLR does not support virtual constructors)
+
+	❓ Can static methods be overridden?
+	❌ No (they are compile-time bound)
+	
+	❓ Why C# avoids multiple inheritance with classes?
+	✅ To prevent ambiguity, diamond problem, and complex memory layout.
+
+	❓ How does C# achieve multiple inheritance?
+	✅ Through interfaces (no state, no constructors).
+
+	❓ Which inheritance type is most dangerous?
+	✅ Deep multilevel inheritance.
+	
+34.Polymorphism	
+	- Polymorphism in OOP (Object-Oriented Programming) means "many forms," allowing a single entity (like a method or object)
+	to behave differently in different contexts,
+	- method overloading(same name, different parameters) and method overriding (subclass provides specific implementation 
+	for inherited method)
+		
+	Key words:
+		Same method
+		Different behavior
+		Runtime resolution
+		
+	- Types of Polymorphism in C#	
+	-> A. Compile-Time Polymorphism - Method Overloading
+	-> B. Runtime Polymorphism - Method Overriding
+	
+	- Method Hiding (new) - public new void Show() this will not call if created object
+	- Method Overriding (virtual + override) - public virtual void Show(),public override void Show()
+		override will get call 
+	- base Keyword (Internal Behavior)  base.Show() = will call base virtual method
+	- Abstract Base Class in Inheritance - Cannot instantiate abstract class
+	- Sealed Classes & Methods = Prevents inheritance,Prevents further overriding,Used for safety and performance
+	-sealed class eg - Payment Gateway Payment success logic must never change.
+	-String class is sealed
+	- DateTime is sealed 
+
+35. STACK
+	Stores method calls and local variables
+	Very fast
+	Automatically cleaned (LIFO)
+	Thread-specific	
+	
+36.HEAP
+	Stores objects
+	Managed by GC (Garbage Collector)
+	Slower than stack
+	Shared across threads
+	
+37. Mutable (Changeable)
+	- A mutable object allows you to modify its fields or properties without creating a new instance of the object.
+	- Examples in C#: Most classes (e.g., List<T>, StringBuilder) and standard structs (unless marked readonly).
+	- // Mutable Example
+		var list = new List<string> { "A" };
+		list.Add("B"); // The same 'list' object is modified
+		
+38. Immutable (Unchangeable)
+	- An immutable object cannot be altered once it is initialized. 
+	  To "change" it, you must create a completely new object with the updated values.
+	- Examples in C#: string, DateTime, and readonly struct.
+	- // Immutable Example
+		string name = "Hello";
+		string newName = name.ToUpper(); // 'name' remains "Hello"; a new string is created
+
+39. Struct -
+	- A struct (structure) in C# is a value type primarily used for encapsulating small, lightweight groups of related data.
+	A struct in C# is a value type that is copied by value, lightweight, and SHOULD be immutable (but is not immutable by default) ,use readonly struct.
+Struct (Value)
+var a = new GeoLocation(10, 20);
+var b = a;   // COPY
+// a and b are independent
+
+Class (Reference)
+var a = new GeoLocation(10, 20);
+var b = a;   // SAME OBJECT
+
+// change b → a changes too
+
+Eg. - GeoLocation(lat, lng),Dimensions(l, b, h);
+
+	- public readonly struct OperationStatus
+		{
+			public bool IsSuccess { get; }
+			public string Message { get; }
+
+			// Private constructor for internal use
+			private OperationStatus(bool isSuccess, string message)
+			{
+				IsSuccess = isSuccess;
+				Message = message ?? string.Empty;
+			}
+
+			// Static factory methods for easy creation
+			public static OperationStatus Success() => new OperationStatus(true, "Operation successful.");
+			public static OperationStatus Failure(string message) => new OperationStatus(false, message);
+		}
+		
+		OperationStatus status = OperationStatus.Failure("Network connection lost.");
+
+		if (status.IsSuccess)
+		{
+			Console.WriteLine(status.Message);
+		}
+		else
+		{
+			Console.WriteLine($"Error: {status.Message}");
+		}
+
+
+40. Boxing & Unboxing (Very Important)
+	Boxing
+		int x = 10;
+		object o = x;   // boxing
+
+		Value copied from stack → heap
+		Performance cost
+
+	Unboxing
+		int y = (int)o; // unboxing
+		Heap → stack
+		Type safety enforced
+
+41. Garbage Collection (GC Basics)
+	Runs on heap
+	Removes unreachable objects
+	Non-deterministic
+	Generational:
+	Gen 0
+	Gen 1
+	Gen 2
+
+42. Value Types (struct, int, bool, etc.)
+	Characteristics
+		Stored directly
+		Copy by value
+		No shared state
+	int a = 10;
+	int b = a;
+	b = 20; 
+	a = 10
+	b = 20
+
+43. Reference Types (class, array, string*)
+	Characteristics
+		Reference stored in stack
+		Object stored in heap
+		Copy = copy of reference
+
+	class A { public int X; }
+
+	A obj1 = new A { X = 10 };
+	A obj2 = obj1;
+	obj2.X = 20;
+	
+	obj1.X = 20
+	obj2.X = 20
+
+
+44. ACCESS MODIFIERS -
+	| Modifier             | Accessibility                     |
+	| -------------------- | --------------------------------- |
+	| `private`            | Same class only                   |
+	| `protected`          | Same class + derived classes      |
+	| `internal`           | Same assembly Key Use Microservices Libraries Modular architecture 
+							 📌 Used to hide implementation inside DLL.                     |
+	| `protected internal` | Derived classes OR same assembly  |
+	| `private protected`  | Derived classes AND same assembly |
+	| `public`             | Everywhere                        |
+
+45. In C#, all interface methods are implicitly public.
+	Why Interface Methods Are Always Public
+		Interfaces define a contract
+		A contract must be accessible to consumers
+		Hiding interface members breaks polymorphism and substitutability
+	
+	Important Exception (C# 8+ – Advanced)
+		From C# 8.0, interfaces can have:
+			default implementations
+			private helper methods inside the interface
+
+46. Constructors
+	- A constructor is a special method used to initialize an object when it is created.
+	- Key Rules (Must Know)
+		Same name as class
+		No return type
+		Called automatically when new is used
+		Can be overloaded
+		Not inherited
+		Cannot be virtual, abstract
+
+	- Parameterized Constructors
+	- Constructor Chaining (this / base)
+	- Static Constructors - A static constructor initializes static members of a class.
+	- Runs before: First object creation OR First static access
+
+47.Destructors 
+	- A destructor is used to clean up unmanaged resources before an object is garbage collected.
+	
+48.IDisposable
+	- IDisposable is a fundamental interface used to provide a mechanism 
+	  for releasing unmanaged resources (such as file handles, database connections, or network sockets).
+
+49.Static Members
+	- Static members belong to the type, not to instances.
+
+50. interface vs abstraction
+	| Feature              | Interface                        | Abstract Class |
+	| -------------------- | -------------------------------- | -------------- |
+	| Multiple inheritance | ✅ Yes                            | ❌ No           |
+	| Fields               | ❌ No (except const)              | ✅ Yes          |
+	| Constructors         | ❌ No                             | ✅ Yes          |
+	| State                | ❌ No                             | ✅ Yes          |
+	| Access modifiers     | Public only (contract)           | Any            |
+	| Implementation       | Optional (C# 8+ default methods) | Partial        |
+	| Purpose              | Capability                       | Base identity  |
+
+	Interface
+	An interface defines a contract that implementing classes must follow, without defining object state.
+
+	Abstract Class
+	An abstract class provides a base class with partial implementation and shared state that derived classes can extend.
+
+51. Composition
+	- Composition means a class uses another class by holding a reference to it instead of inheriting from it.
+	- Key Line That Makes It “Composition”  - private readonly Logger _logger;
+	- Yes — constructor injection is a form of composition.
+	- Composition is a design principle, while dependency injection is a technique to achieve composition and loose coupling.
+	- Constructor dependency injection is the preferred way to implement composition because it enforces required dependencies and enables loose coupling.
+	
+	- Inheritance vs Compostion
+	- Inheritance
+     	class Logger
+		{
+			public void Log(string msg) { }
+		}
+
+		class OrderService : Logger
+		{
+			public void PlaceOrder()
+			{
+				Log("order placed");
+			}
+		}
+		What this means
+		OrderService IS A Logger
+
+		Logger behavior is baked into OrderService
+
+		Cannot change logging behavior
+
+		❌ This relationship is wrong
+		❌ Tight coupling
+		❌ Hard to change later
+
+
+	Composition
+		class Logger
+		{
+			public void Log(string msg) { }
+		}
+
+		class OrderService
+		{
+			private readonly Logger _logger;
+
+			public OrderService(Logger logger)
+			{
+				_logger = logger;
+			}
+
+			public void PlaceOrder()
+			{
+				_logger.Log("order placed");
+			}
+		}
+		What this means
+		OrderService HAS A Logger
+
+		Logger is a dependency
+
+		Behavior is delegated
+
+		✔ No inheritance
+		✔ Loose coupling
+		✔ Easy to change
+
+
+class A
+	{
+		public virtual void Print()
+		{
+			Console.WriteLine("A");
+		}
+	}
+
+	class B : A
+	{
+		public new void Print()
+		{
+			Console.WriteLine("B");
+		}
+	}
+
+	class Program
+	{
+		static void Main()
+		{
+			A obj = new B();
+			obj.Print();
+
+			B obj2 = new B();
+			obj2.Print();
+		}
+	}
+	
+	Answer - A,B
+	
+	| Keyword  | Binding Time | Decision Based On |
+	| -------- | ------------ | ----------------- |
+	| override | Runtime      | Object type       |
+	| new      | Compile-time | Reference type    |
+
+Imp -
+	Static Constructors: Bottom - Top (Derived class first).
+	Instance Constructors: Top - Bottom (Base class first). 
+
+Static field initialization runs before static constructor
+Base class always initializes before derived
+Static constructors run once per type
+Instance constructors run every object creation
+
+52.SOLID Principle -
+
+-> The acronym of the 5 design principles helps developers to create software that is more maintainable, flexible, and scalable.
+
+	1.(S)Single Responsibility Principle (SRP): 
+		- A class should have one reason to change (one responsibility)
+		- Bad Eg. -
+			public class Invoice
+			{
+				public void CalculateTotal()
+				public void PrintInvoice()
+				public void SaveToDB()
+			}
+		- Good Eg. - 
+			public class Invoice
+			{
+				public void CalculateTotal(){}
+			}
+			public class InvoicePrinter
+			{
+				public void PrintInvoice(){}
+			}
+		- SRP → CreateOrderHandler (does only order creation)
+		
+	2.(O)Open/Closed Principle (OCP): 
+		- Classes should be open for extenstion but close for modification.
+		- Use abstraction and polymorphism instead of modifying existing code.
+		- Bad Eg. -
+			public class AreaCalculator
+			{
+				public double Area(object shape)
+				{
+					if(Shape == Circle)
+						 return Math.PI * Radius * Radius;
+					else if(Shape == Rectangle)
+						return w*h;
+				}
+			}
+		- Good Eg. - 
+			public abstract class Shape
+			{
+				public abstract double Area();
+			}
+			
+			public class Circle:Shape
+			{
+				public double Radius { get; set; }
+				public override double Area()
+				{
+					return Math.PI * Radius * Radius;
+				}
+			}
+			
+			public class Rectangle:Shape
+			{
+				public double w { get; set; }
+				public double h { get; set; }
+				public override double Area()
+				{
+					return w*h;
+				}
+			}
+		
+		- OCP → IPaymentService (extend via new implementations)
+
+	3.(L)Liskov Substitution Principle (LSP):
+		- Subclasses should be replacable for their base classes without breaking behavior.
+		- Subclasses should be replaceable for their base classes means that you should be able to use a 
+		  child class object in place of a parent class object without changing how the program behaves or breaking its logic.
+		- Bad Eg.
+			public class Bird
+			{
+				public virtual void Fly();
+			}
+			public class Ostrich:Bird
+			{
+				Ostrich cant fly
+			}
+		- Good Eg.
+			public abstract class Bird(){}
+			
+			public class FliyingBird:Bird
+			{
+				public void Fly(){}
+			}
+			
+			public class Ostrich:Bird
+			{
+				public void Run(){}
+			}
+			
+		- LSP → RazorpayService : IPaymentService 
+		- (CashPayment , OnlinePayment )
+
+	4.(I)Interface Segregation Principle (ISP):
+		- No client should be forced to depend on methods it doesn’t use.
+		- Break large interface into smaller,specifed one.
+		- Bad Eg.
+			public interface IMachine
+			{
+				void Print();
+				void Scan();
+				void Fax();
+			}
+			public class OldPrinter:IMachine
+			{
+				Print();
+				Scan(); - Not implemented
+				Fax(); - Not implemented
+			}
+			
+		- Good Eg.
+			public interface IPrinter
+			{
+				void Print();
+			}
+			public interface IScanner
+			{
+				void Scan();
+			}
+		- ISP → IUserCommandService, IUserQueryService
+		
+	5.(D)Dependency Inversion Principle (DIP):
+		- High level modules should not depend on low level modules, both should depend on abstraction.
+		- Use interface + Dependency Injection
+		- Bad Eg.
+			public class EmailService
+			{
+				public void SendEmail(string message)
+			}
+			public class Notification
+			{
+				EmailService _es = new EmailService();
+				_es.SendEmail("test mail");	
+			}
+		- Good Eg.
+			public interface IMessageService {
+				void Send(string message);
+			}
+			public class EmailService : IMessageService {
+				public void Send(string message) {
+					// Email sending logic
+				}
+			}
+			public class Notification {
+				private readonly IMessageService _service;
+
+				// Inject the dependency via constructor
+				public Notification(IMessageService service) {
+					_service = service;
+				}
+
+				public void Notify(string message) {
+					_service.Send(message);
+				}
+			}
+		
+		- DIP → IOrderRepository (used by Application, implemented in Infrastructure)
+
+	“SOLID appears in Clean Architecture through handlers, interfaces, and dependency injection.”
+
+
+53. Covariance & Contravariance
+	They describe how generic types behave with inheritance.
+	The core problem
+		Given:
+			class Animal { }
+			class Dog : Animal { }
+		Can this work?
+			List<Dog> dogs = new List<Dog>();
+			List<Animal> animals = dogs; // ❌ not allowed
+		
+		Why?
+			Because generics are invariant by default.
+	
+	Covariance (out) - Dog → Animal (upcast) Covariance allows child to parent.
+	Contravariance (in) - Animal → Dog (reverse direction) Contravariance allows parent to child.
+		
+		
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+.NET Runtime Flow
+C# code → IL (EXE or DLL) → EXE process starts → CLR loads → JIT compiles IL → native code runs → GC manages memory → done
+
+1. You write code in C#
+	Human-readable .cs source files.
+	
+2. C# compiler compiles to IL
+	The C# compiler (csc.exe) produces:
+		IL code (Intermediate Language)
+		Metadata
+		Output → EXE or DLL
+	✔ EXE = has Main()
+	✔ DLL = library (no entry point)
+	IL is not machine code yet.
+	
+3. A worker process starts (ALWAYS an EXE)
+	This is very important:
+		If you run a console app, your EXE runs.
+		If you run MVC / Web API, IIS (w3wp.exe) is the EXE.
+		If .NET Core, dotnet.exe is the EXE.
+	✔ Every .NET application executes inside an EXE process.
+	
+4. CLR loads inside the process
+	CLR = Common Language Runtime (the .NET Runtime)
+	It initializes:
+		JIT compiler
+		Garbage Collector (GC)
+		Security
+		Thread Pool
+		Type System
+		Assembly Loader
+	CLR is now ready to run IL.
+
+5. CLR loads assemblies (your EXE + DLLs)
+	CLR reads:
+		IL code
+		Metadata
+		Manifest
+		✔ Loading = preparing
+		✔ NOT executing yet
+
+6. JIT compiles IL → native machine code
+
+	When the program calls a method for the first time:
+		CLR sends the IL to JIT
+		JIT converts IL → native CPU instructions
+		Native code is stored in memory
+		Next time → runs native code directly (no JIT)
+	JIT runs only once per method unless the app restarts.
+
+7. Native code executes + GC runs
+	Once compiled, the native code runs.
+	During execution:
+		Objects are allocated on the managed heap
+		GC automatically frees unused memory
+		ThreadPool runs background tasks
+		Exceptions, type safety, and security handled by CLR
+	✔ CLR manages the whole runtime environment
+
+8. Program finishes
+	When the EXE process ends:
+		CLR shuts down
+		All DLLs unload
+		GC cleans up
+		OS ends the process
+
+
+
+3. Thread (Worker) -
+	- A thread is a worker that executes code step by step on the CPU.
+	- If code is running, some thread is running it.
+	- Thread comes from Thread Pool (in ASP.NET)
+	- Thread needs:CPU time, Stack memory (from RAM)
+	- One thread executes one instruction at a time
+	
+4. Task (Work Promise) -
+	- A Task represents work that will finish in the future and eventually produce a result or completion signal.
+	- A Task may use a thread
+	- A Task may wait without using a thread (I/O)
+	- Task is just an object that tracks state:	Running,Completed,Faulted
+
+5. async (Capability Marker) -
+	- This method can pause and resume later without blocking a thread.
+	- What async actually does
+		- Allows use of await
+		- Converts method into a state machine
+		- Method returns:Task,Task<T>
+		
+6. await (Pause Without Blocking) -
+	- Pause this method here, free the thread, and continue when the Task completes.
+	- await does NOT block
+	- await releases the thread
+	- Continuation runs later on some thread
+
+
+When I was working in WinForms, I had a progress bar with marquee style.
+Initially I called the report generation method normally, and the progress bar was not moving because the UI thread was busy doing the heavy work. Since WinForms has only one UI thread, it could not repaint the screen.
+Then I used async/await and ran the long operation asynchronously. The work moved to a background thread and the UI thread became free, so the progress bar animation started moving smoothly.
+From that I understood async/await doesn’t make execution faster — it just prevents blocking and keeps the application responsive.
+
+7. Thread Pool (Workers Factory) -
+	- A Thread Pool is a collection of reusable worker threads maintained by the .NET CLR to execute work efficiently.
+	
+8. Why Thread Pool Exists (VERY IMPORTANT)
+	Creating a new thread is:
+		- Expensive (memory + CPU)
+		- Slow
+		- Wasteful if created repeatedly
+
+	So instead:
+		- Threads are created once
+		- Reused again and again
+		- Reuse workers instead of hiring new workers every time
+
+
+9. Who Creates the Thread Pool?
+	- CLR (.NET runtime) creates it
+	- Not IIS
+	- Not your application code
+	- IIS / Kestrel:
+		- Only send requests
+		- CLR provides threads
+	
+	
+10. How Many Threads Are There?
+	Default behavior (dynamic):
+		- Thread pool starts small
+		- Grows based on load
+		- Shrinks when idle
+	Typical limits (approx):
+		- Worker threads: ~250 per CPU core
+		- I/O threads: ~1000 per CPU core
+	Your machine:
+		- 11th Gen i5 (4 cores / 8 logical cores)
+		- 8 cores × 250 ≈ 2000 threads (max)
+
+1. Synchronous Programming - 
+	- Synchronous programming means tasks are executed one after another, and each task must finish completely 
+	  before the next task can start.
+	- The current thread waits (blocks) until the work is done.
+	- How it works (real meaning)
+		- One task starts
+		- CPU/thread stays busy or waiting
+		- Nothing else runs on that thread
+		- When the task finishes → next line executes
+	- eg . You go to a government office:
+	
+2. Asynchronous Programming -
+	- Asynchronous programming means a task is started, but the thread does NOT wait for it to finish.
+	  The thread is free to do other work, and the result is handled later when the task completes.
+	- How it works (real meaning)
+		- Task starts
+		- Thread releases control
+		- Thread can handle other requests
+		- When task finishes → result is picked up
+	- eg . You order food in a restaurant:
+
+3. Parallel Programming -
+	- Parallel programming means executing multiple tasks at the same time using multiple CPU cores to improve performance.
+	- You have 4 couriers:
+		- Instead of 1 person delivering 100 parcels one by one
+		- You assign 25 parcels to each → work finishes faster
+	- eg. RabbitMQ
+		- Multiple consumers processing messages in parallel
+		
+
+11. ASP.NET Core Request Flow
+	When a request comes in:
+		1. Request arrives at Kestrel
+		2. Kestrel asks CLR:
+			“Give me a worker”
+		3. Thread Pool provides a free thread
+		4. Thread executes: Controller → Service → Repo
+		5. Thread returns to pool after response
+	
+12. Connection string query for framework and core-
+	- Web.config
+		<configuration>
+		  <connectionStrings>
+			<add name="DefaultConnection" connectionString="Data Source=SERVERNAME; Initial Catalog=DatabaseName;User ID=sa;Password=your_password;"
+			providerName="System.Data.SqlClient" />
+		  </connectionStrings>
+		</configuration>
+		
+	To Read - 
+		using System.Data;
+		using System.Data.SqlClient;
+		using System.Configuration;
+
+		string connStr =
+			ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+
+		DataSet ds = new DataSet();
+
+		using (SqlConnection con = new SqlConnection(connStr))
+		using (SqlCommand cmd = new SqlCommand("GetEmployeeData", con))
+		{
+			cmd.CommandType = CommandType.StoredProcedure;
+
+			// INPUT PARAMETER
+			cmd.Parameters.Add("@DeptName", SqlDbType.VarChar, 50).Value = "Accounts";
+
+			// DATA ADAPTER
+			using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+			{
+				da.Fill(ds);   // 🔥 This fills the DataSet
+			}
+		}
+	
+	- appsettings.json
+		{
+		  "ConnectionStrings": {
+			"DefaultConnection": "Server=SERVERNAME;
+								  Database=DatabaseName;
+								  User Id=sa;
+								  Password=your_password;
+								  TrustServerCertificate=True;"
+		  }
+		}
+		TrustServerCertificate=True is common in local/dev environments
+		
+		To Read - 
+		- EF Core 
+			builder.Services.AddDbContext<AppDbContext>(options =>
+			options.UseSqlServer(
+				builder.Configuration.GetConnectionString("DefaultConnection")));
+
+		- Using with ADO.NET in .NET Core
+			using Microsoft.Data.SqlClient;
+			SqlConnection con =
+				new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+
+12. Ajax Query - 
+	- AJAX allows a web page to communicate with the server asynchronously and update parts of the UI without reloading the page.
+	
+	$.ajax({
+		url: '/Employee/GetEmployeesByDept',
+		type: 'GET',
+		data: { deptName: deptName }, // 🔹 query string
+		dataType: 'json',
+		success: function (data) {
+			
+		},
+		error: function (err) {
+			alert('Error occurred');
+		}
+	});
+	
+	POST - 
+		type: 'POST',
+		data: JSON.stringify({ deptName: deptName }),
+		contentType: 'application/json'
+
+	- contentType: 'application/json' - What you are sending TO the server
+	- dataType: 'json', - What you expect to receive FROM the server
+		
+13. CREATE PROCEDURE - 
+
+	CREATE PROCEDURE CountEmployee
+		@Name VARCHAR(100),
+		@Salary DECIMAL(10,2),
+		@DeptName VARCHAR(50),
+		@NewId INT OUTPUT
+	AS
+	BEGIN
+		select Name, Salary, DeptName from Employees
+
+		SET @NewId = SCOPE_IDENTITY()
+	END
+
+14. SQL Function - 
+	A SQL function is a database object that returns a value (single value or table) and can be used inside a SELECT query.
+	Types of SQL Server Functions - Scalar Function(Single value),Inline Table-Valued Function (iTVF)(Table),
+									Multi-Statement Table-Valued Function (mTVF)(Table)
+									
+	CREATE FUNCTION dbo.fn_GetAnnualSalary
+	(
+		@MonthlySalary DECIMAL(10,2)
+	)
+	RETURNS DECIMAL(10,2)
+	AS
+	BEGIN
+		RETURN (@MonthlySalary * 12)
+	END
+
+15. ref and out and  in
+	ref and out are parameter modifiers
+	ref and out both pass arguments by reference 	
+	
+	- in is used to pass a variable by reference but as read-only for performance optimization.
+	
+	- ref
+		The variable must be initialized before being passed
+		The method can read and modify the value
+	- out
+		The variable does not need to be initialized
+		The method must assign a value before returning
+		If out is not assigned a value inside the method before it returns, the C# compiler throws a compile-time error
+	
+	- Pass by Value
+		A copy of the variable is sent to the method
+		Changes inside the method do not affect the original value
+		Pass by value is useful when you don’t want a method to change your original data
+	- Pass by Reference
+		The actual variable (its memory address) is sent to the method
+		Changes inside the method do affect the original value
+	
+16. Stack and Heap -
+	Stack - 
+		- A fast, small, LIFO (Last In, First Out) memory area.
+		- Used to store method calls and local variables.
+		- Method call frames
+		- Local variables (value types)
+		- Method parameters (value types)
+		- References (addresses) to heap objects
+		- Memory is allocated and freed automatically
+		- Very fast
+		- Size is limited
+		- Data lifetime = method scope
+		
+	Heap -
+		- A large, slower, shared memory area.
+		- Used to store objects created with new.
+		- Reference type objects (class, string, array)
+		- Object data (fields)
+		- Boxed value types
+		- Memory allocated dynamically
+		- Managed by Garbage Collector (GC)
+		- Objects live beyond method scope
+		- Slower than stack
+		- Static variables are stored on the HEAP, inside the AppDomain / process memory, once per type.
+		- Static class = container of static data on heap
+		
+	class Person
+	{
+		public string Name;
+	}
+
+	void CreatePerson()
+	{
+		Person p = new Person();
+		p.Name = "Anurag";
+	}
+
+	Memory behavior
+	- p (reference) → stack
+	- Person object → heap
+	- Stack stores only the address
+	- Heap stores the actual object
+	
+
+17. Monolithic Architecture - 
+	Monolithic Architecture is a software design where the entire application is built, 
+	deployed, and run as a single unit, with all features, layers, 
+	and modules tightly coupled into one codebase and one deployment.
+	
+	In a monolithic application:
+		UI
+		Business logic
+		Data access
+		Integrations
+	- All live inside one application
+	- Deployed together
+	- Run as one process
+	
+18. Microservices Architecture -
+	Microservices Architecture is a design approach where an application is built as a collection of small, 
+	independent services, each responsible for a single business capability, and each service can be developed, 
+	deployed, and scaled independently.
+	
+	Each microservice:
+		Has its own codebase
+		Runs in its own process
+		Is deployed separately
+		Owns its own database
+		Communicates via HTTP / gRPC / messaging
+	
+19. Tier Architecture
+	Tier Architecture is a design pattern where an application is divided into logical or physical layers (tiers), 
+	and each tier has a specific responsibility.
+	
+	2-Tier Architecture - 
+		- In 2-Tier architecture, the application is divided into Client tier and Database tier, 
+		  where the client communicates directly with the database.
+		- Client (UI + Business Logic)
+			 ↓
+		  Database
+		- Example 
+			Desktop apps (WinForms, WPF)
+			Client directly using SQL Server
+			Small desktop apps
+	
+	3-Tier Architecture - 
+		- 3-Tier architecture separates the application into Presentation, Business, and Data tiers.
+		- Presentation Tier (UI)
+				↓
+		  Business Tier (Logic)
+				↓
+		  Data Tier (Database)
+		- Example
+			Presentation → ASP.NET MVC / Web API
+			Business → Services
+			Data → Repository / EF / SQL
+			Most web applications
+			
+	N-Tier Architecture - 
+		- N-Tier architecture extends 3-Tier by adding more specialized layers for better scalability and flexibility.
+		-   UI
+			 ↓
+			API Layer
+			 ↓
+			Business Layer
+			 ↓
+			Domain Layer
+			 ↓
+			Data Access Layer
+			 ↓
+			Database
+		- Example
+			Enterprise & large systems
+		
+		
+20. Layered Architecture
+	- Layered Architecture is a design approach where an application is organized into logical layers, 
+	  each with a specific responsibility, and each layer communicates only with the layer directly below it.
+		Presentation Layer
+				↓
+		Application / Business Layer
+				↓
+		Domain Layer
+				↓
+		Data Access / Infrastructure Layer
+		
+21. Layered vs Tier Architecture
+	- Layered 
+		- code organization
+		- Meaning Logical separation
+		- Layers Code-level
+		- Deployment Same or separate
+		- Focus Maintainability
+		
+	- Tier
+		- deployment structure
+		- Meaning Physical deployment
+		- Layers Server-level
+		- Deployment Often separate servers
+		- Focus Scalability
+		
+22. Layered vs Clean Architecture
+	- Layered
+		- Dependency direction Top → Bottom
+		- Business isolation - Partial
+		- Framework independence - Low–Medium
+		- Business layer often depends on EF, SQL, frameworks
+	
+		public class OrderService
+		{
+			private readonly AppDbContext _db;
+
+			public OrderService(AppDbContext db)
+			{
+				_db = db;
+			}
+		}
+		
+		❌ Business depends on EF
+		❌ Hard to test without DB
+
+	- Clean Architecture
+		- Dependency direction Outside → Inside
+		- Business isolation Strong
+		- Framework independence High
+		- Dependencies always point inward
+		
+		public class CreateOrderUseCase
+		{
+			private readonly IOrderRepository _repo;
+
+			public CreateOrderUseCase(IOrderRepository repo)
+			{
+				_repo = repo;
+			}
+		}
+
+		✔ Business depends on abstraction
+		✔ EF lives outside (Infrastructure)
+		
+		Testing difference (very practical)
+			Layered
+				Need DB or heavy mocks
+				Slower tests
+			Clean
+				Pure unit tests
+				No DB needed
+				Very fast
+		
+		Layered architecture can become Clean if:
+			You apply Dependency Inversion
+			Business layer depends only on interfaces
+			Infrastructure implements those interfaces
+		
+		Layered architecture separates code by responsibility, while Clean Architecture enforces dependency inversion to protect business rules—even
+		if both look visually similar.
+		
+
+23. AWS -
+	- AWS is a cloud computing platform that lets you rent IT resources 
+	  (servers, storage, databases, networking, etc.) over the internet instead of buying and managing physical servers.
+	  
+	- Why AWS exists (the problem it solves)
+
+		Before cloud:
+			Buy servers 
+			Install OS, DB, software
+			Handle power, cooling, backups
+			Scale manually (slow & costly)
+
+		With AWS:
+			Create a server in minutes
+			Pay only for what you use
+			Scale automatically
+			No hardware maintenance
+			  
+			  
+	- Core AWS building blocks
+		- Regions & Availability Zones
+			- Region → Physical location (e.g., Mumbai, Singapore)
+			- Availability Zone (AZ) → Multiple data centers inside a region
+			- Apps are deployed across AZs for high availability
+			- Example: Mumbai Region → AZ-a, AZ-b, AZ-c
+
+	- Compute
+		- EC2 (Elastic Compute Cloud)
+		- Virtual machine in the cloud
+		- You choose:
+			OS (Windows/Linux)
+			CPU, RAM
+
+		- Used for:
+			ASP.NET MVC
+			.NET Core APIs
+			Background services
+
+		- Analogy: EC2 = renting a computer
+	  
+		- Auto Scaling
+			- Automatically adds/removes EC2 instances
+			- Based on CPU, memory, traffic
+			
+	
+	- Storage (Saving data)
+		- S3 (Simple Storage Service)
+		- Object storage
+			Used for:
+				- Images
+				- PDFs
+				- Invoices
+				- Backups
+		- Analogy: Google Drive for applications
+		
+	- EBS (Elastic Block Store)
+		- Disk attached to EC2
+		- Stores OS, app files, logs
+		
+	- Database services
+		- RDS (Relational Database Service)
+			- Managed databases:
+				- SQL Server
+				- MySQL
+				- PostgreSQL
+	  
+			- AWS handles:
+				- Backups
+				- Patching
+				- Failover
+				
+		- DynamoDB
+			- NoSQL key-value database
+			- Very fast, fully managed
+			  
+	- Networking (How users reach your app)
+		- VPC (Virtual Private Cloud)
+			- Your private network in AWS
+			- Control:
+				- IP ranges
+				- Subnets
+				- Security
+							
+		- Load Balancer (ALB / NLB)
+		- Distributes traffic across EC2s
+		- Improves:
+			- Performance
+			- Availability
+		  
+	- Security -
+		- IAM (Identity & Access Management)
+			- Users, roles, permissions
+			- Controls who can access what
+		- Example:
+			EC2 can access S3
+			Developer can deploy but not delete DB
+		- Security Groups
+			- Firewall for EC2
+			- Controls:
+				- Port (80, 443, 1433)
+				- IP access
+	
+	- DevOps & Monitoring -
+
+		- CloudWatch
+			- Logs
+			- Metrics
+			- Alerts
+
+		- CodePipeline / CodeBuild
+			- CI/CD (build & deploy automatically)
+	
+	- Serverless (no server management)
+		- Lambda
+			- Run code without servers
+			- Event-based (file upload, API call)
+		- API Gateway
+			- Create REST APIs
+			- Works with Lambda
+		
+	- Typical .NET application on AWS
+		User
+		 ↓
+		Load Balancer
+		 ↓
+		EC2 (ASP.NET Core API)
+		 ↓
+		RDS (SQL Server)
+		 ↓
+		S3 (files, invoices)
+
+	- To work with AWS S3 using .NET SDK, the following are required:
+		- Mandatory Inputs
+			- Bucket Name
+			- Bucket Region
+			- AWS Access Key ID
+			- AWS Secret Access Key
+		- Required SDK & Namespaces
+		- NuGet Packages
+			- AWSSDK.Core
+			- AWSSDK.S3	
+		- Namespaces used
+			using Amazon;
+			using Amazon.S3;
+			using Amazon.S3.Model;
+			using Amazon.S3.Transfer;
+
+	- AWS S3 Setup via AWS Management Console
+		Step 1: Login
+			- Sign in to AWS Management Console
+			- URL: https://aws.amazon.com/console/
+
+		Step 2: Open S3 Service
+			- Search S3 → Open Amazon S3 Console
+
+		Step 3: Create Bucket
+			- Click Create bucket
+			- Enter:
+				- Bucket Name (must be globally unique)
+				- Region (example: Mumbai / us-east-1)
+		- Configure options if required:
+			- Versioning
+			- Permissions
+		- Click Create bucket
+		- Note: Bucket name is globally unique across AWS.		
+		
+	- IAM User & Access Key Creation
+		Step 1: Open IAM
+			- Services → IAM
+
+		Step 2: Create / Select User
+			- IAM → Users → Add User
+			- Access Type:
+				- Programmatic Access
+
+		Step 3: Assign Permissions
+		- Add user to group OR
+		- Attach policy directly:
+			- AmazonS3FullAccess (for development)
+
+		Step 4: Generate Access Keys
+			- Go to Security Credentials
+			- Create Access Key
+			- Save:
+			- Access Key ID
+			- Secret Access Key (shown only once)
+		
+	- Secure Credentials Using AWS CLI (Best Practice)
+		- Step 1: Install AWS CLI
+			- https://aws.amazon.com/cli/
+			
+		- Step 2: Configure Credentials
+			- aws configure
+		
+		- Step 3: Enter Values
+			- AWS Access Key ID     : <accesskey>
+			- AWS Secret Access Key : <secretkey>
+			- Default region name   : <region>
+			- Default output format :
+			
+		- Credentials are stored securely in:
+			- Environment Variables / Credential Store
+			
+	- AWS S3 Operations Implemented
+		- 1. File Exists Check
+			- Flow:
+				1. Initialize AmazonS3Client
+				2. Call GetObjectMetadata
+				3. If object exists → success
+				4. If not → exception → file not found
+				
+			- Implementation Logic:
+				- var client = new AmazonS3Client(accessKey, secretKey, region);
+				- await client.GetObjectMetadataAsync(bucketName, keyName);
+
+			- If object does not exist → AWS throws NotFound exception.
+			
+		- 2. Upload File to S3
+			- Flow:
+				- Initialize AmazonS3Client
+				- Initialize TransferUtility
+				- Upload file using bucket name & key name
+			- Steps:
+				- Save uploaded file temporarily on server
+				- Upload to S3
+			
+			- Code Flow:
+				- var client = new AmazonS3Client(region);
+				- var transferUtility = new TransferUtility(client);
+				- await transferUtility.UploadAsync(filePath, bucketName, keyName);
+			
+			- keyName = File name in S3
+			- bucketName = Target bucket
+			
+		- 3. Download File from S3
+			- Flow:
+				1. Initialize AmazonS3Client
+				2. Call GetObject
+				3. Read response stream
+				4. Convert stream to byte array / save locally
+		
+			- Code Logic:
+				- var response = await client.GetObjectAsync(bucketName, keyName);
+				- using (var stream = response.ResponseStream)
+				  {
+				  	// copy stream to MemoryStream or file
+				  }
+
+		- Handling “Access Denied” Issue
+			- Problem:
+				- AWS SDK throws Access Denied
+
+			- Root Cause:
+				- IAM user does not have S3 permissions
+
+			- Fix:
+				1. IAM → User → Permissions
+				2. Add user to group OR
+				3. Attach policy:
+					- AmazonS3FullAccess
+
+			- Without proper IAM policy, SDK calls fail.
+			
+			
+24.Cryptography-
+	- Cryptography is the science of protecting information so that:
+		- Only authorized parties can read it
+		- Data cannot be altered without detection
+		- Sender identity can be verified
+		
+	- It provides:
+		- Confidentiality
+		- Integrity
+		- Authentication
+		- Non-repudiation
+		
+	- Cryptography has three major categories:
+		| Category       | Purpose                   | Examples             |
+		| -------------- | ------------------------- | -------------------- |
+		| Encryption | Protect data (reversible) | AES, RSA             |
+		| Hashing  | Verify data (one-way)     | MD5, SHA-256, bcrypt |
+		| Signing    | Prove authenticity        | RSA signatures       |
+
+	- MD5 vs bcrypt vs SHA-256 (clear comparison)
+		| Feature        | MD5         | SHA-256           | bcrypt |
+		| -------------- | ----------- | ----------------- | ------ |
+		| Type           | Hash        | Hash              | Hash   |
+		| Speed          | Very Fast ❌ | Fast ❌            | Slow ✅ |
+		| Salt           | ❌ No        | ❌ No (by default) | ✅ Yes  |
+		| Password safe  | ❌ No        | ❌ No              | ✅ Yes  |
+		| Collision safe | ❌ No        | ✅ Yes             | ✅ Yes  |
+
+		
+	- Symmetric Encryption
+		- Symmetric Encryption uses ONE single key for:
+			- Encryption
+			- Decryption
+		- Plain Text + Secret Key → Encrypted Data Encrypted Data + Same Secret Key → Plain Text
+			
+		- Characteristics
+			- Very fast
+			- Best for large data
+			- Key sharing is risky
+
+		- Example
+			- AES (Advanced Encryption Standard)
+		- Usage
+			- Encrypting files
+			- Encrypting database columns
+			- Encrypting API payloads (after key exchange)		
+					
+			
+	- 1. AES (Advanced Encryption Standard)
+		- A symmetric encryption algorithm
+		- Uses fixed key sizes:
+			- 128-bit
+			- 192-bit
+			- 256-bit
+						
+		- Why AES is used
+			- Extremely fast
+			- Highly secure
+			- Industry standard
+
+		- Common Modes
+			- AES-CBC
+			- AES-GCM (recommended)
+						
+			
+	- Asymmetric Encryption
+		- Asymmetric Encryption uses TWO keys:
+			- Public Key	Encrypt / Verify
+			- Private Key	Decrypt / Sign
+		
+		- Characteristics
+			❌ Slower than symmetric
+			✅ Very secure
+			✅ No key sharing problem
+		- Example
+			- RSA
+					
+	- RSA(Rivest–Shamir–Adleman)
+	
+	- An asymmetric encryption algorithm
+	- Uses public & private key pair
+	- RSA is mainly used for:
+		- Encrypting small data
+		- Key exchange
+		- Digital signatures
+	- RSA is NOT used to encrypt large payloads
+	
+	- Hashing - 
+		- Hashing is a one-way process:
+			- Cannot be reversed
+			- No decryption possible
+		- Characteristics
+			- One-way only
+			- Used for verification, not recovery
+		- Example
+			- bcrypt
+
+	- bcrypt (Password Hashing)
+		- A password hashing algorithm
+		- Includes:
+			- Salt
+			- Multiple rounds
+			- Slow by design	
+
+		- Why bcrypt is used
+			- Protects against brute-force attacks
+			- Even if DB is stolen, passwords are safe
+		- bcrypt is NOT encryption
+		- bcrypt cannot be decrypted	
+		- Why NOT create your own hashing algorithm?
+			- Custom logic is reversible or predictable
+			- No protection against brute-force attacks
+				- Attackers use:
+					- GPUs
+					- Billions of guesses per second
+			- Built-in salt (automatically)
+			- Industry-proven & audited
+			
+		- What is a Brute-Force Attack?
+			- A brute-force attack is when an attacker tries every possible combination of 
+			  characters until the correct password or key is found.
+
+
+	- RSA + AES (Hybrid Encryption)
+		- Why Hybrid Encryption?
+			| Problem                              | Solution         |
+			| ------------------------------------ | ---------------- |
+			| AES is fast but key sharing is risky | Use RSA          |
+			| RSA is secure but slow               | Use only for key |
+			| Best of both worlds                  | RSA + AES        |
+
+		- Hybrid Encryption – Encryption Flow
+			Step 1: Generate AES Session Key
+				A random AES key is generated per request
+			Step 2: Encrypt AES Key using RSA Public Key
+				Only the private key holder can decrypt it
+			Step 3: Encrypt Payload using AES
+				JSON / Request body encrypted with AES key	
+
+		- Client
+			 ├─ AES encrypt JSON payload
+			 ├─ RSA encrypt AES key (public key)
+			 └─ Send both to server
+
+		- Hybrid Encryption – Decryption Flow
+			Step 1: Decrypt AES Key
+				Server uses RSA private key
+			Step 2: Decrypt Payload
+				AES key decrypts JSON payload
+		
+		- Server
+			 ├─ RSA decrypt AES key (private key)
+			 └─ AES decrypt payload → Plain Text
+
+
+25. JWT Authentication
+
+	- JWT (JSON Web Token) is a secure way to send information between client and server in JSON format.
+	- It is mainly used for:
+		- Authentication
+		- Authorization 
+	A JWT has 3 parts separated by dots:
+		- header.payload.signature
+	What each part means
+		Header: algorithm info (e.g., HS256)
+		Payload: claims/data (userId, role, exp…)
+		Signature: created using a secret/private key → prevents tampering
+	= JWT payload is Base64 encoded, not encrypted.
+	= Access Token - (short life, e.g., 15 min)
+	= Refresh token (longer life)
+	= Client sends token in header: Authorization: Bearer <JWT>
+
+=>Bearer means: “whoever is holding (bearing) this token is allowed.”
+=>standard format of the Authorization header
+
+	- JWT Flow
+		- Question: Who issues the token?
+		👉 Server / API
+			- User logs in using username & password
+			- Server validates credentials
+			- Server generates JWT
+			- Token is sent back to client
+			
+	- JWT Structure
+		- JWT consists of 3 parts, separated by dots (.):
+		- xxxxx.yyyyy.zzzzz
+
+		- 1. Header
+			Contains:
+			 - Algorithm (e.g. HS256)
+			 - Token type (JWT)
+
+		- 2. Payload
+			Contains:
+				- Claims
+				- User data
+
+			Example:
+				- sub (user id)
+				- name
+				- role
+				- exp
+
+		- 3. Signature
+			- Generated using:
+				Header
+				Payload
+				Secret Key
+			- Ensures integrity & authenticity
+	
+	
+	- Audience
+		Question: Who is the token for?
+		👉 Client / Frontend
+			- Token is issued for a specific application
+			- Prevents misuse by other apps
+	- Claims
+	- Used for: User info
+		Examples:
+		- UserId
+		- Username
+		- Role
+		- Email
+					
+	- Expiry
+		- Token expiry time
+			- Token has a fixed lifetime
+			- Example: 15 min / 1 hour
+			- Prevents infinite usage
+
+	- Signature
+		- Purpose: Security
+			- Token is signed using a secret key
+			- Ensures token is not tampered
+
+	- Invalid Token
+		- If token is:
+			- Expired
+			- Modified
+			- Invalid signature
+
+	👉 Server returns 401 Unauthorized
+	 
+	- Signing Method
+		- HS256 (HMAC SHA-256) is commonly used
+		- Uses secret key
+
+	- Token Storage (Client Side)
+		JWT is usually stored in:
+			- Local Storage
+			- Session Storage
+			- HTTP-only Cookies (recommended)
+
+	- JWT Validation (Server Side)
+		Server validates:
+			- Token format
+			- Signature
+			- Expiry time
+			- Issuer
+			- Audience
+			
+		If valid → request allowed
+		If invalid → 401 Unauthorized
+
+	- Invalid Token Response
+		401 Unauthorized
+	
+	- JWT Usage in API
+		- Token is sent in HTTP Header
+		- Authorization: Bearer <JWT_TOKEN>
+	
+	- Important JWT Security Points
+		- Never store secret key in frontend
+		- Always use HTTPS
+		- Use short-lived access tokens
+		- Use refresh tokens if required
+	
+	Flow = 
+		1. User logs in
+			Server sends:
+				- Access token (response body)
+				- Refresh token (HttpOnly cookie)
+		2. Client uses access token
+			- Sent in Authorization header
+			- Valid for 15 minutes
+			- No refresh call during this time
+		3. Access token expires
+			- API returns 401 Unauthorized
+		4. Client calls /refresh
+			- Browser automatically sends cookie
+			- No JS access to refresh token
+		5. Server does ALL of this:
+			- Reads refresh token from cookie
+			- Hashes & checks DB
+			- Verifies not revoked
+			- GENERATES NEW refresh token
+			- Revokes old refresh token
+			Issues:
+				New access token
+				New refresh token (new cookie)
+
+		✔ This is refresh token rotation
+
+
+26. Session Management
+	- Session management is how an application keeps user-specific data across multiple requests.
+	- Examples of session data:
+		- Logged-in user id
+		- Role / permissions
+		- Temporary state (wizard steps, cart, etc.)
+		
+	- Client-side Session Management
+		- Cookies 
+			- Cookies are small text files stored by browsers to help websites remember user data, preferences,
+   			  and login states, enhancing functionality and personalization.
+			- Small key–value data stored in browser
+			- Automatically sent with every request
+		- Local Storage / Session Storage
+			- Browser storage
+			- Used mainly in SPA apps
+		- JWT (Token-based)
+			- Session data encoded inside token
+			- Stored in browser or app memory
+			
+	- Server-side Session Management
+		- Session data stored on the server.
+		- Client only stores a Session ID.
+		- 1. In-Memory Session
+			- Session stored in application memory
+		- 2. SQL Server Session State
+			- Session stored in SQL Server database
+		- 3. Distributed Cache Session (Redis)
+			- Session stored in Redis (in-memory DB)
+		
+	- How .NET Provides Session Support
+		- ASP.NET (.NET Framework)
+			- HttpSessionState
+			- Session["key"]
+		- Supports:
+			- InProc (Memory)
+			- StateServer
+			- SQL Server
+	
+27. Session vs JWT vs Cookie
+	| Feature          | Session     | JWT          | Cookie       |
+	| ---------------- | ----------- | ------------ | ------------ |
+	| Stored where     | Server      | Client       | Client       |
+	| Stateful         | Yes         | No           | No           |
+	| Server memory    | Required    | Not required | Not required |
+	| Scales easily    | ❌           | ✅            | ✅            |
+	| Logout easy      | ✅           | ❌            | N/A          |
+	| API friendly     | ❌           | ✅            | ⚠️           |
+	| Size limit       | No          | Medium       | ~4KB         |
+	| Can be encrypted | Server-side | Signed       | Optional     |
+
+29. ActionResult → Legacy MVC apps only
+	IActionResult → When returning multiple result types
+	ActionResult<T> → Modern Web APIs (RECOMMENDED)
+
+30.LINQ (Language Integrated Query) lets you query collections (List, Array, DB, XML) using C# syntax. 
+  Used in Api json filtering -eg getting error message from json - 
+  first convert into jobject JObject obj = JObject.Parse(json); 
+  var errorMessages = obj["shipmentResults"] .SelectMany(sr => sr["errors"]) .Select(e => e["errorContent"].ToString()); 
+  Lambda Expression (e =>) 
+  var data = students .Where(e => e.Marks >= 75) .OrderByDescending(e => e.Marks) .Select(e => new { e.Name, e.Marks }); 
+  var data = employees .GroupBy(e => e.Department) .Select(g => new { Department = g.Key, TotalSalary = g.Sum(e => e.Salary) });
+  var data = students .GroupBy(e => e.Course) .Select(e => new { Course = e.Key, StudentCount = e.Count() }); 
+
+
+
+31.What is .NET?
+.NET is a software development platform by Microsoft used to build different types of applications, such as:
+	- Web applications
+	- Desktop applications
+	- Mobile apps
+	- Cloud services
+	- APIs & microservices
+	
+32.What is .NET Core?
+.NET Core is a modern, lightweight, cross-platform version of .NET.
+| Feature       | .NET Framework   | .NET Core / .NET                                      |
+| ------------- | ---------------- | ----------------------------------------------------- |
+| Platform      | Windows only     | Cross-platform                                        |
+| Performance   | Slower           | Faster                                                |
+| Deployment    | IIS only         | IIS, Nginx, Apache, Docker, Kubernetes, Linux servers |
+| Open Source   | Mostly closed    | Fully open-source                                     |
+| Cloud Ready   | Not ideal        | Built for cloud                                       |
+| Microservices | Not suitable     | Perfect fit                                           |
+| Future        | No major updates | Actively developed                                    |
+| CLI Support   | ❌ No real CLI    | ✅ Strong CLI (`dotnet`)                               | 
+| Runtime               | CLR             | CoreCLR               |
+| App model             | Monolithic      | Modular               | 
+| Kestrel               | ❌ Not available | ✅ Built-in            |
+| Config system         | web.config      | appsettings.json      | 
+| DI container          | ❌ No            | ✅ Built-in            |
+| Async support         | Partial         | Full async everywhere |
+| API style             | System.Web      | ASP.NET Core          |
+
+
+33.What is Kestrel?
+Kestrel is the built-in, cross-platform web server of .NET Core / .NET.
+Kestrel is a lightweight, high-performance web server used by .NET to host web applications.
+Why Kestrel exists
+
+In old .NET Framework:
+	IIS was mandatory.
+	App could not run without IIS.
+
+In .NET Core / .NET:
+Kestrel allows:
+	Self-hosting
+	Linux hosting
+	Docker containers
+	Cloud-native apps
+
+What Kestrel actually does
+	Kestrel:
+	Opens a port (5000, 7000, etc)
+	Handles:
+		HTTP/HTTPS
+		Routing requests into middleware
+		Sending responses back
+
+	But it does NOT:
+		Do SSL termination well (that’s why reverse proxy used)
+		Handle advanced security
+		Handle load balancing
+
+
+| Feature        | Kestrel | IIS / Nginx |
+| -------------- | ------- | ----------- |
+| HTTP handling  | Yes     | Yes         |
+| Static files   | Basic   | Excellent   |
+| SSL cert mgmt  | Weak    | Strong      |
+| Load balancing | No      | Yes         |
+| Security       | Basic   | Strong      |
+| Process mgmt   | Basic   | Advanced    |
+
+
+34.What is Nginx?
+Nginx is a web server used as a reverse proxy, load balancer, and static file server for web applications.
+Kestrel is not meant to be exposed directly to the internet in production.
+Nginx is a reverse proxy and load balancer that sits in front of Kestrel to handle security, SSL, and traffic management.
+
+Nginx:
+	Blocks bad traffic
+	Handles HTTPS certificates
+	Distributes load across multiple services
+	Serves images/CSS without touching your API
+
+ 
+35.Namespace 
+	A namespace is a logical grouping of classes used to organize code and avoid class name conflicts in large applications.
+	If both Razorpay and Stripe have a class called PaymentService, namespaces allow both to exist without collision.
+	
+36.What is a .NET Assembly?
+	An assembly is the basic building block of a .NET application.
+	It is the compiled output of your code.
+	Assembly = Compiled unit of code (.dll or .exe)
+
+37.Managed vs Unmanaged Code 
+	Managed code runs under CLR and uses garbage collection. Unmanaged code runs directly on OS and needs manual memory management.
+	
+Managed Code
+	Managed code is code that runs under the control of the .NET runtime (CLR).
+	Features
+		Memory handled by Garbage Collector (GC)
+		Automatic memory allocation & deallocation
+		Type safety
+		Exception handling by runtime
+		More secure and stable
+
+	Examples
+		C#
+		VB.NET
+		F#
+		ASP.NET Core code
+
+Unmanaged Code
+	Unmanaged code runs outside CLR control.
+	Programmer is responsible for memory.
+	Runtime = OS
+	Examples
+		C / C++
+		Win32 APIs
+
+	Can .NET use Unmanaged Code?
+		Yes, via Interop:
+			P/Invoke
+			COM Interop
+			DLLImport
+	
+	
+	
+38.const vs readonly vs static readonly in C#
+	const (Compile-time constant)
+		const means the value is fixed at compile time.
+	
+	Rules
+		Must be initialized at declaration
+		Value must be known at compile time
+		Automatically static
+		Cannot be changed ever
+		
+	eg . public const double PI = 3.14;
+
+	readonly (Runtime constant)
+		readonly means value can be set only once, at runtime.
+		Rules
+			Can be set:
+				At declaration
+				Or in constructor
+			Value decided at runtime
+			Not static by default
+		
+	eg. public readonly string ConnectionString;
+
+	static readonly
+		- Belongs to the class, not instance.
+		static readonly fields must be initialized either at declaration or in a static constructor, not in an instance constructor.
+		One shared value for whole app, set once.
+		
+39.equals vs == 
+== is an operator that checks whether two variables refer to the same object in memory (or same value for value types).
+.Equals() is a method that checks whether two objects are logically equal based on their data/content.
+== checks identity,
+.Equals() checks equality.
+
+
+For value types, == and .Equals() both compare values.
+For reference types, by default both compare references.
+But .Equals() can be overridden to compare object data.
+The == operator must be overloaded separately if we want value comparison.
+
+Identity = same memory
+Equality = same meaning/data
+		
+		
+40. What is var in C#?
+	var is used for implicit type declaration.
+	“Let the compiler figure out the data type from the value.”
+	eg . - var x = 10;
+		 - Compiler sees 10 → so it becomes:
+		 - int x = 10;
+	- Why do we use var instead of class name? 
+	- Because sometimes the type is too long or obvious.
+	- Without var: Dictionary<string, List<int>> data = new Dictionary<string, List<int>>();
+	- With var: var data = new Dictionary<string, List<int>>();
+	- var → strongly typed
+	- object → weakly typed container
+	
+41. Implicit vs Explicit
+	- Implicit - Something happens automatically by the compiler. You don’t have to specify it.
+	- Explicit - You manually specify what you want.
+
+42.this keyword 
+	- this represents the current instance of the class.
+	- When local variable and class variable have same name.
+	- this.name = name;
+	
+43.base
+	- base refers to the parent class instance.
+	-  Access parent method base.Show();
+
+
+base keyword is used in child class to access parent class members and to call parent class constructor.
+It allows us to pass parameters to parent constructor or call parent method when it is overridden.
+
+In EF Core, our AppDbContext inherits from DbContext.
+We pass DbContextOptions to the base constructor using : base(options).
+This initializes the parent DbContext with connection string and provider configuration.
+
+
+44.Finalize
+	- Done automatically by Garbage Collector (GC).
+	- Finalize() is a method that runs when the object is about to be destroyed by GC.
+	
+	
+45.Dispose
+	- Done manually by developer.
+	- Dispose() is part of IDisposable interface.
+	using (var fm = new FileManager())
+	{
+	   // use it
+	}
+	
+	Auto calls Dispose().
+	= Example: Database connection
+	using (SqlConnection con = new SqlConnection())
+	{	
+	   con.Open();
+	}
+	As soon as block ends:
+		Dispose() runs
+		Connection closed immediately
+	If you rely on Finalize:
+		Connection stays open until GC runs
+		Can kill performance
+		
+	
+46.Using
+	- using as a Namespace Import
+	- using allows you to use classes from a namespace without writing full name.
+	- With using namespace: Console.WriteLine("Hello");
+	- Without using: System.Console.WriteLine("Hello");
+	
+	- using as Resource Management (IDisposable)
+	- using ensures Dispose() is called automatically
+	- You rent a car and must return it before leaving.
+	
+47.What is an Extension Method?
+	- An extension method is a way to add new methods to an existing class without modifying it, inheriting it, or recompiling it.
+	- It looks like a method of a class, but it is actually a static method in another class.
+	- eg - Array.Contains() (extension method)
+	- bool exists = numbers.Contains(3);
+	- Contains comes from LINQ
+	
+48.API Gateway
+	- An API Gateway is a single entry point for all client requests in a system (especially in microservices architecture).
+	- Popular API Gateways
+	- Azure,AWS
+	- .NET / Self-hosted
+	- Ocelot (most popular in .NET),YARP (Microsoft),Nginx
+	- Oclet.json 
+		- DownstreamPathTemplate Gateway → http://localhost:5001/api/orders
+		- UpstreamPathTemplate - Client → http://localhost:7000/orders
+	- Aggregator Model?
+		- Aggregator Model is a pattern where a single service collects data from 
+		  multiple microservices and returns a combined response to the client.
+		- Client → Aggregator → A, B, C → Aggregator → Client
+
+49. Rate Limiting
+	- Restricting how many requests a client can make in a given time window.
+	- Max 100 requests per minute per user
+	- If user sends 101st request → 429 Too Many Requests
+	- Without rate limiting:
+		- One bad client can overload your system
+		- Bots can spam login API
+	- With rate limiting:
+		- System stays stable
+		- Fair usage for all users
+	- .net core built-in builder.Services.AddRateLimiter
+	
+50. What is Docker?
+	- Docker is a tool to package your application with everything it needs (runtime, libraries, config) 
+	  into a single unit called a container, so it runs the same everywhere.
+	- docker uses host kernel and isolated from host os
+	- Docker Image - Blueprint of your app. .exe + OS + .NET runtime
+	- Container - Running instance of image. Image → many containers
+	- Dockerfile - Recipe to build image.
+	- Docker Hub - GitHub for Docker images.
+	- Run container - docker run -p 5000:80 myapi
+	- Docker Compose - Run multiple containers together. docker-compose.yml
+	- On Windows, Docker runs inside a Linux virtual machine, and containers share that kernel, not Windows kernel.
+	- docker pull rabbitmq:3.13-management
+
+51. What is Nginx?
+	- Nginx (pronounced engine-x) is a high-performance web server and reverse proxy used to handle 
+	  HTTP requests, route traffic, and serve content.
+	- Nginx can run anywhere, but it lives best on Linux.
+	
+52. What is SQL Injection?
+	- SQL Injection is a security attack where an attacker injects malicious
+       SQL code into an input field to manipulate or access your database
+	- SQL Injection occurs when user input is directly used in SQL queries without proper validation or parameterization.
+	- Classic example (vulnerable code)
+	- string query = "SELECT * FROM Users WHERE Username = '" 
+               + txtUsername.Text + 
+               "' AND Password = '" 
+               + txtPassword.Text + "'";
+	- SELECT * FROM Users 
+	  WHERE Username = 'admin' AND Password = '' OR '1'='1'
+	- How to prevent SQL Injection (most important)
+		1. Parameterized Queries (BEST)
+		2. Use ORM (Entity Framework)
+		3. Stored Procedures (safe if used correctly)
+		
+53.What is CORS?
+	- CORS (Cross-Origin Resource Sharing) is a browser security mechanism 
+	  that controls whether a web page from one origin is allowed to call APIs from another origin.
+	- What is an origin? An origin = combination of: Protocol + Domain + Port http://localhost:4200
+	Real scenario (your setup)
+	Angular:
+	http://localhost:4200
+
+	.NET API:
+	http://localhost:5000
+
+	Browser says:
+	❌ Blocked by CORS
+
+	Because:
+	Different port = different origin
+
+	- Preflight request For non-simple requests: Browser sends:OPTIONS /api/orders
+	-  Anything other than: GET, POST, HEAD
+	- So these trigger preflight: PUT, DELETE, PATCH
+
+54.HTTP Handlers,IHttpHandler,HTTP Handler vs HTTP Module	
+	- HTTP Handlers?
+	- An HTTP Handler is the actual endpoint that processes an HTTP request and generates a response.
+	- HTTP Handler is a class that handles incoming HTTP requests and produces HTTP responses.
+	- In MVC 4.5 When you write:public ActionResult GetOrders()
+	- Behind the scenes: ASP.NET creates an internal handler:MvcHandler
+	- Which implements: IHttpHandler
+	- So your flow is:
+	  Request
+	  → Routing
+	  → MvcHandler (IHttpHandler)
+	  → Controller Action
+	
+	- IHttpHandler (interface)
+	- IHttpHandler is an interface in ASP.NET (.NET Framework) that represents a class capable of processing HTTP requests.
+	- IHttpHandler is the root building block of ASP.NET request processing.
+
+	- HTTP Module	
+	- An HTTP Module is a pipeline component in ASP.NET (.NET Framework) that can intercept every HTTP request and response.
+	- It does not handle the request, it observes or modifies it.
+	- eg. [Authorize]
+	- HTTP Module = middleware of old ASP.NET.
+	- Because some logic must apply to all requests, not just one controller.
+	
+		Request
+		  |
+		HTTP Modules  ← here
+		  |
+		Routing
+		  |
+		HTTP Handler (MvcHandler)
+		  |
+		Response
+
+	
+- I haven’t created custom handlers directly because MVC and Web API internally use handlers like MvcHandler 
+  and HttpControllerHandler. 
+  So I’ve always worked on top of them.
+  
+- DelegatingHandler is an HTTP message handler used to intercept and modify 
+  outgoing HTTP requests and responses in the HttpClient pipeline.
+	
+55.What is CSRF?
+	- CSRF is an attack where a logged-in user is tricked into opening a malicious link/page, which makes 
+	  the user’s browser send an unwanted request to the trusted website. Since the user is already logged in, 
+	  the browser automatically includes the session cookie, and the server may perform the action thinking it was the user.
+	 
+	- CSRF: attacker triggers request from another site, cannot read token ⇒ token blocks it
+
+	- XSS: attacker runs code on your site, can read token ⇒ token may not help
+
+	- CSRF (Cross-Site Request Forgery) is an attack where a malicious website tricks a user’s browser 
+	  into making an unwanted request to a trusted site where the user is already authenticated.
+	
+	- .net framework @HTML.AntiFrogeryToken() - hidden field  with random token with mathcing value in cookie
+	- [ValidateAntifrogerytoken] - tells server to check that token on post request
+	- .net core jwt - no need then
+
+wpf- windows presentation foundation = replacement of winform - xaml based mvvm 	
+	
+	
+1. throw - Used to manually raise an exception. (throw new ArgumentException("Invalid age");)
+2. throw; - Rethrows the same exception while preserving the original stack trace.
+3. throw ex; - Rethrows the exception but resets the stack trace (bad practice).
+4. try-catch - Used to handle exceptions and prevent program crash.
+5. finally - Always executes, used for cleanup like closing files or connections.
+
+
+using (Resource Management)
+	=> Meaning – Ensures Dispose() is automatically called after usage.
+	=> Why – Prevent resource leaks and improve performance.
+	=> Where – SqlConnection, streams and file handling.
+	=> Example – Renting a car and returning it before leaving.
+	=> Note – Recommended way to manage disposable objects.
+---------------------------------------------------------------------------------------------
+using (Namespace Import)
+	=> Meaning – Allows using classes without writing full namespace.
+	=> Why – Makes code shorter and readable.
+	=> Where – System.Console → Console.
+	=> Example – Using nickname instead of full name.
+	=> Note – Only affects code readability, not memory management.
+
+
+
+
+---------------------------------------------------------------------------------------------
+Namespace
+	=> Meaning – A namespace is a logical container used to group related classes and avoid name conflicts.
+	=> Why – Large applications may have classes with same name, so namespaces prevent collisions.
+	=> Where – Organizing modules like Payment, Order, Customer in projects.
+	=> Example – Two companies having employees with same name but different departments.
+	=> Note – Allows classes like Razorpay.PaymentService and Stripe.PaymentService to coexist.
+	
+	
+	
+---------------------------------------------------------------------------------------------------------------------------------------
+.Net Core - 
+
+Client
+  |
+Kestrel (web server)
+  |
+Middleware 1 (Logging)
+  |
+Middleware 2 (CORS)
+  |
+Middleware 3 (Auth)
+  |
+Middleware 4 (Routing)
+  |
+Endpoint (Controller/Minimal API)
+  |
+Back through middleware
+  |
+Response
+
+
+1.ASP.NET Core Middleware
+	- Middleware is a component that handles HTTP requests and responses in the ASP.NET Core pipeline.
+	- Built-in middleware you already use
+		app.UseCors();
+		app.UseAuthentication();
+		app.UseAuthorization();
+		app.MapControllers();
+	- Runs in sequence
+	- Request Top -> Bottom
+	- Response Bottom -> Top
+	- eg - to check which api takes time - PerformanceMiddlewares
+	
+	- Ways to create -
+	- 1. Inline middleware - 
+		app.Use(async (context, next) =>
+		{
+			var start = DateTime.Now;
+			await next();
+			var time = DateTime.Now - start;
+			Console.WriteLine($"{context.Request.Path} took {time}");
+		});
+		
+	- 2. Class-based middleware
+		
+2.Use app.Use()
+	- adds a middleware to the pipeline that can either process the request and pass it to the next middleware or stop the pipeline.
+	
+3.Run  app.Run()
+	- Run adds a terminal middleware that handles the request and ends the pipeline.
+
+4.Map app.Map()
+	- Map branches the middleware pipeline based on request path.
+	
+5.Next await next();
+	- next is a delegate that represents the next middleware in the pipeline.
+	- Calls next middleware
+
+6.Short-circuiting
+	- Short-circuiting means stopping the pipeline without calling next().
+	
+7.Delegate 
+	- Delegate = a type-safe reference to a method.
+	- Because sometimes you want to:
+	- Pass a function as a parameter
+	- Store a function in a variable
+	- Call different methods dynamically
+	- When you call: await next(); 
+	- next is:RequestDelegate next 
+	- delegate Task RequestDelegate(HttpContext context);
+	- Passing functions (delegates) to other functions
+	- Functions calling other functions.
+	
+8.What are Events in C#?
+	- An event is a mechanism that allows an object to notify other objects when something happens.
+	- WinForms is event-driven.
+	- button.Click += Button_Click;
+	- “Run my method when this event happens.”
+	
+9.Filters vs Middleware
+	- Middleware is global, filters are MVC scoped.
+
+10.What is ASP.NET Core Request Pipeline?
+	- The request pipeline is the ordered sequence of middleware components that handle every incoming HTTP request.
+	The request pipeline is a conveyor belt.
+	Each middleware is a station.
+	Every request must pass through each station in order.
+	
+11.Startup.cs vs Program.cs
+	- They both exist to do the same two things:
+		Register services (DI)
+		Build request pipeline (middleware)
+	- Startup.cs was replaced by Program.cs in .NET 6 using the minimal hosting model, but internally they perform the same tasks.
+	
+	- Startup.cs
+		public class Startup
+		{
+			public void ConfigureServices(IServiceCollection services)
+			{
+				services.AddControllers();
+			}
+
+			public void Configure(IApplicationBuilder app)
+			{
+				app.UseRouting();
+				app.UseAuthorization();
+				app.UseEndpoints(endpoints =>
+				{
+					endpoints.MapControllers();
+				});
+			}
+		}
+	
+	- Program.cs 
+		var builder = WebApplication.CreateBuilder(args);
+
+		builder.Services.AddControllers();
+
+		var app = builder.Build();
+
+		app.UseRouting();
+		app.UseAuthorization();
+		app.MapControllers();
+
+		app.Run();
+	
+		- This is called Minimal Hosting Model.
+		Not functionality — only structure.
+		Microsoft removed:
+			Startup.cs
+			Boilerplate code
+		And merged everything into:
+			Program.cs
+	
+	
+12. Dependency Injection
+	- DI is a design pattern where object(dependencies) are provided to class rather than class creating itself
+	- DI is built in dotnet core
+	- no need third party libraries like Autofac,unity,etc
+	- Promote loose coupling
+	- Improve testability
+	- Achived from Constructor,Property,Method
+	
+	| Lifetime  | Meaning                    | Example
+	| --------- | -------------------------- |--------------------------
+	| Singleton | One instance for whole app | Logger, Cache
+	| Scoped    | One per request            | DbContext, Repository
+	| Transient | New every time             | Email sender, PDF generator
+
+13.What is Global Exception Handling?
+	- Global Exception Handling is a mechanism to catch and handle all unhandled exceptions in one central place.
+	- Instead of:
+		Try/catch in every controller
+		You do it once globally.
+	- .net core custom middleware app.UseMiddleware<GlobalExceptionMiddleware>();
+	- Built-in way app.UseExceptionHandler("/error");
+
+14.Factory vs Singleton Pattern
+	Factory 
+		- Factory Pattern centralizes and hides object creation logic, making code loosely coupled and easier to maintain.
+		- Without factory:
+			if(type == "email")
+			   new Email();
+			else if(type == "sms")
+			   new Sms();
+		- This logic spreads everywhere.
+		- One place. Clean. Maintainable.
+	
+		- Solves 
+		public interface INotification { }
+
+		public class Email : INotification { }
+		public class Sms : INotification { }
+
+		public class NotificationFactory
+		{
+			public static INotification Create(string type)
+			{
+				return type == "email" ? new Email() : new Sms();
+			}
+		}
+	
+		var notifier = NotificationFactory.Create("email");
+ 
+	
+	Instead of using traditional factory pattern, we leveraged dependency injection with keyed services
+	and centralized service registration using extension methods on IServiceCollection. 
+	This reduces boilerplate code and makes object resolution cleaner and more maintainable.
+	
+	builder.Services.AddKeyedScoped<IPaymentGateway, RazorpayGateway>("razorpay");
+		builder.Services.AddKeyedScoped<IPaymentGateway, StripeGateway>("stripe");
+		builder.Services.AddKeyedScoped<IPaymentGateway, PaypalGateway>("paypal");
+
+
+	Singleton
+		- Singleton ensures that only one instance of a class exists and provides a global access point to it.
+		 
+15.Repository Pattern
+	- Repository Pattern is a design pattern that hides database logic from business logic.
+	
+16.What is Deadlock?
+	- Two or more threads are waiting for each other forever, so none of them can proceed.
+	Simple example:
+		Thread A locks Resource 1, waits for Resource 2
+		Thread B locks Resource 2, waits for Resource 1
+		→ Both stuck forever.
+	- make use of async await to prevent
+	
+17.Caching
+	- Caching means storing frequently used data in fast storage so it can be returned quickly without recomputing or re-fetching.
+	- Types of caching
+		- 1. In-Memory Cache (local)
+			- builder.Services.AddMemoryCache();
+		- 2. Distributed Cache (Redis)
+		- 3. Response Cache (HTTP level) - Cache whole HTTP response. [ResponseCache(Duration = 60)]
+
+18.Logging
+	- Logging is the practice of recording events and information about what an application is doing.
+	- Libraries - Serilog
+	- Builtin- ILogger abstraction
+	
+	
+19.Http Status Code 
+	- 200(OK) - Request Successful (Get or PUT)
+	- 201(Created) - Resource Created (POST)
+	- 204(No Content) - Success but no Body (Delete)
+	- 400(Bad Request) - Invalid Input (JSON Wrong)
+	- 401(Unauthorized) - Not Logged In(invalid auth)
+	- 403(Forbidden) - Login but not allowed
+	- 404(Not Found) - Resource not found (00999- doesnt exist
+	- 422(Unpprocesable Entity) - Validation failed
+	- 429(Too Many Requests)
+	- 500(Internal Server Error) - Something went wrong on server
+	- 502(Bad Gateway) - Gateway received invalid response
+	- 503(Service Unavailable) - Server Down
+	- 504(Gateway Timeout)
+	
+20.What is the difference between IConfiguration and IOptions
+| Feature          | IConfiguration | IOptions     |
+| ---------------- | -------------- | ------------ |
+| Access style     | Key-value      | Object       |
+| Type safety      | ❌ No           | ✅ Yes        |
+| Validation       | ❌ No           | ✅ Yes        |
+| Refactoring safe | ❌ No           | ✅ Yes        |
+| Best for         | Quick reads    | App settings |
+					
+IConfiguration 
+	- IConfiguration is a key-value based configuration system used to read raw configuration values.
+	- var conn = _config["ConnectionString"];
+
+IOptions
+	- IOptions is a strongly-typed way to bind configuration to C# classes.
+	- builder.Services.Configure<JwtSettings>(
+    builder.Configuration.GetSection("Jwt"));
+
+System Design
+-----------------------------------------------------------------------------------------------------------------------------------------
+1. CQRS - 
+	- CQRS stands for Command Query Responsibility Segregation.
+	  It means separating read operations and write operations into different models.
+
+	| MVC                     | CQRS              |
+	| ----------------------- | ----------------- |
+	| Controller handles both | Separate handlers |
+	| Entity models           | Separate models   |
+	| CRUD oriented           | Intent oriented   |
+
+2. Domain-Driven Design (DDD)
+	- DDD is a software design approach that focuses on modeling the business domain accurately
+    	and placing business logic at the center of the system.
+	- DDD = think like a business expert, not like a database designer.
+	
+	
+Entity Framework Core	
+-----------------------------------------------------------------------------------------------------------------------------------------
+1. Why Entity Framework Core (EF Core)?
+	Entity Framework Core is an ORM (Object Relational Mapper) for .NET.
+	- EF Core lets you work with a database using C# objects instead of writing SQL manually.
+	
+2.IEnumerable
+	- Executes query in memory.
+	- Forward only iteration
+	- Dictionary
+	- Behavior:
+		Data fetched first
+		Filtering happens in C#
+	- _db.Orders.ToList().Where(x => x.Status == "Active");
+	 
+	- IEnumerable represents a read-only sequence of elements that can be iterated using a foreach loop.
+	- System.IO.File.ReadLines = ReadLines is IEnumerable (lazy load one by one)
+	- System.IO.File.ReadAllLines = string[] loads all data
+	
+	
+3.IQueryable
+	- Builds SQL and executes in database.
+	- Querying external data source.
+	- LINQ to sql
+	- _context.Couriers it is a DbSet<Courier> And DbSet<T> implements IQueryable<T>.
+
+Eg,If the Courier table has three bit fields for WhatsApp, SMS, and Email, I filter records in the database using IQueryable 
+to fetch only those that require notification.
+After executing ToListAsync, I use IEnumerable in memory to decide which channel to send and perform the notification logic.
+
+There are two Where methods in .NET:
+1️⃣ System.Linq.Enumerable.Where() → works on IEnumerable (in memory)
+2️⃣ System.Linq.Queryable.Where() → works on IQueryable (builds SQL)
+	
+	
+4.ILISt
+	- collection of items can accessed by items and modified
+	
+5.IAsyncEnumerable
+	- Streams data asynchronously.
+	
+6.Eager vs Lazy vs Explicit Loading
+	- Eager Loading
+		Load everything at once.
+		- Related data is loaded together with the main query.
+		- var orders = _db.Orders.Include(x => x.Customer).ToList();
+	
+	- Lazy Loading
+		Loads related data when accessed.
+		- Related data is loaded automatically when a navigation property is accessed.
+		
+		- order.Customer.Name
+		- Triggers another SQL.
+		Needs:
+			virtual navigation
+			proxies
+		Danger:
+			N+1 problem
+		-Requirment - Microsoft.EntityFrameworkCore.Proxies ,    options.UseLazyLoadingProxies();, 
+		- Without virtual → no lazy loading.
+		- eg.
+			var orders = _db.Orders.ToList();
+			SELECT * FROM Orders
+			var c1 = orders[0].Customer; // SQL fired
+			var c2 = orders[1].Customer; // SQL fired
+			var c3 = orders[2].Customer; // SQL fired
+		
+		- One query for Orders
+		- One query per Order for Customer
+		
+	- Explicit Loading
+		- You decide manually.
+		- You manually tell EF Core when to load related data.
+		- _db.Entry(order).Reference(x => x.Customer).Load();
+		
+	
+Entity Framework supports three types of loading:
+Eager Loading using Include loads related data in a single query.
+Lazy Loading loads related data when accessed, which may cause multiple queries.
+Explicit Loading allows manual loading of related data when required.
+Eager loading is generally preferred in Web APIs to avoid N+1 query issues.
+	
+7. First vs FirstOrDefault vs Single vs SingleOrDefault		
+		
+	First()
+	Returns first item.
+	Throws if none.
+
+	FirstOrDefault()
+	Returns first or null.
+
+	Single()
+	Exactly one.
+	Throws if:
+		None
+		More than one
+
+	SingleOrDefault()
+	One or zero.
+	Throws if more than one.
+		
+		
+8.EF Core Migrations
+	- Migrations track schema changes in code and apply them to database.
+	
+	Add-Migration AddOrderTable
+	Update-Database
+	
+9.Code First vs Database First
+
+	Code First
+		You design C# classes.
+		EF creates tables.
+		
+	Database First
+		DB already exists.
+		EF generates models.
+	
+10.Tracking vs NoTracking
+	Tracking 
+		Tracking means EF Core keeps track of entities so it can detect changes and save them back to the database.
+		_db.SaveChanges(); // EF knows what changed
+		- Update/Delete
+	NoTracking
+		NoTracking means EF Core does NOT track entities, so it treats them as read-only.
+		- var orders = _db.Orders.AsNoTracking().ToList();
+		- Read-only
+	 
+---
+
+# ✅ LINQ – Element Operators (One Line Each)
+
+**First()** – Returns the first matching item and throws an exception if none exist.
+
+**FirstOrDefault()** – Returns the first matching item or default (null) if none exist, without throwing an exception.
+
+**Single()** – Returns exactly one matching item and throws an exception if none or more than one exist.
+
+**SingleOrDefault()** – Returns one matching item or null if none exist, but throws an exception if more than one exist.
+
+---
+
+# ✅ Dapper – Core Concepts (One Line Each)
+
+**Dapper** – A lightweight ORM that maps raw SQL query results directly to C# objects with high performance.
+
+**Query()** – Executes a query and returns multiple records mapped to objects.
+
+**QueryFirst()** – Returns the first row from the result set and throws if no rows exist.
+
+**QueryFirstOrDefault()** – Returns the first row or null if none exist, without throwing an exception.
+
+**QuerySingle()** – Expects exactly one record and throws if none or multiple records exist.
+
+**QuerySingleOrDefault()** – Returns one record or null if none exist, but throws if multiple records are found.
+
+**Execute()** – Executes INSERT, UPDATE, or DELETE commands and returns the number of affected rows.
+
+**ExecuteScalar()** – Returns a single value (first column of the first row), commonly used for aggregate queries.
+
+**QueryMultiple()** – Executes a query that returns multiple result sets and reads them using Read<T>().
+
+--- 
+
+	
+	
+	
+Caching	
+------------------------------------------------------------------------------------------------------------------------------------------
+1. Distributed Caching
+	- Distributed cache is shared across servers.
+	- Distributed caching stores cached data in a central shared store so all application instances can access the same cache.
+	In-memory cache = personal notebook
+	Distributed cache = shared Google Doc
+	
+	Client
+	   |
+	Load Balancer
+	   |
+	API Server A ─┐
+	API Server B ─┼── Redis Server (6379)
+	API Server C ─┘
+
+2.What is Redis?
+	- Redis is an in-memory key-value data store used for caching, messaging, and fast data access.
+	Redis stores data in:
+		RAM (not disk)
+		So it is extremely fast (microseconds)
+	You usually use Redis via:
+		- IDistributedCache (simple)
+			-   dotnet add package Microsoft.Extensions.Caching.StackExchangeRedis
+				builder.Services.AddStackExchangeRedisCache(options =>
+				{
+					options.Configuration = "redis-server:6379";
+				});
+				
+				string cacheKey = "shippers_list";
+				var cached = await _cache.GetStringAsync(cacheKey);
+
+				if (!string.IsNullOrEmpty(cached))
+				{
+					list = JsonSerializer.Deserialize<List<ShipperMaster>>(cached)!;
+				}
+				 list = (await _shipperRepository.GetShipperListAsync())?.ToList() ?? new List<ShipperMaster>();
+				 if (list.Any())
+				 {
+					 await _cache.SetStringAsync(
+						 cacheKey,
+						 JsonSerializer.Serialize(list),
+						 new DistributedCacheEntryOptions
+						 {
+							 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+						 });
+				 }
+			- Redis (via IDistributedCache) stores:
+				byte[]
+				or string
+		- StackExchange.Redis (advanced)
+
+	
+
+3.Load balancer 
+	- A load balancer distributes incoming requests across multiple servers and automatically routes traffic away from servers that are down.
+	
+
+
+
+AGILE & PROCESS
+---------------------------------------------------------------------------------------------------------------------------------------
+| Term                  | Description                                                                      |
+| --------------------- | -------------------------------------------------------------------------------- |
+| Agile                 | A development methodology focused on iterative delivery and continuous feedback. |
+| Scrum                 | A popular Agile framework for managing work in sprints.                          |
+| Sprint                | A fixed time period (usually 2 weeks) to complete a set of tasks.                |
+| Product Backlog       | A prioritized list of all features and requirements.                             |
+| User Story            | A requirement written from user perspective.                                     |
+| Story Points          | Relative estimation of effort.                                                   |
+| Daily Standup         | 15-minute daily team meeting.                                                    |
+| Sprint Review         | Demo of completed work to stakeholders.                                          |
+| Sprint Retrospective  | Meeting to improve process after sprint.                                         |
+| Definition of Done    | Criteria to mark a task as complete.                                             |
+| Velocity              | Amount of work completed per sprint.                                             |
+| Burndown Chart        | Graph showing remaining work.                                                    |
+| Backlog Grooming      | Refining and prioritizing backlog.                                               |
+| Technical Debt        | Future cost of quick or poor solutions.                                          |
+| CI/CD                 | Continuous integration and deployment.                                           |
+| MVP                   | Minimum product with core features.                                              |
+| Stakeholder           | Business person interested in product.                                           |
+| Kanban                | Flow-based Agile method without sprints.                                         |
+| Impediment            | Blocker in work.                                                                 |
+| Cross-functional Team | Team with dev, QA, ops together.                                                 |
+
+
+Version Control 	
+---------------------------------------------------------------------------------------------------------------------------------------
+| Command           | What it is used for                       |
+| ----------------- | ----------------------------------------- |
+| `git stash`       | Temporarily save uncommitted changes      |
+| `git cherry-pick` | Apply a specific commit to another branch |
+| git log --oneline   | d4f7a12 Fix login bug   ← this is C a3b9c22 Add UI changes git cherry-pick d4f7a12
+| `git merge`       | Merge one branch into another             |
+| `git rebase`      | Rewrite commit history                    |
+| `git reset`       | Move HEAD to previous commit              |
+| `git revert`      | Safely undo a commit                      |
+| `git pull`        | Fetch + merge from remote                 |
+| `git fetch`       | Fetch only (no merge)                     | 
+| `git clone <url>`        | Copy remote repository to local |
+| `git add .`              | Stage changes                   |
+| `git commit -m "msg"`    | Save changes locally            |
+| `git push`               | Upload commits to remote        |
+| `git checkout <branch>`  | Switch branch                   |
+| `git stash`              | Temporarily save work           |
+| `git cherry-pick <hash>` | Apply specific commit           |
+| `git pull`               | Fetch + merge from remote       |
+
+	
+	
+	
+	
+	
+	
+	
+		
+		
+		
+		
+		
+Data Structure - 
+-----------------------------------------------------------------------------------------------------------------------------------------	
+1.What ?
+	- A Data Structure is a way of organizing and storing data in memory so that it can be used efficiently.
+	- Data = information (numbers, text, objects)
+	- Structure = how that data is arranged
+	
+	- Two Types - 
+		- 1.Primitive
+			- int, float/double, char, bool, pointer
+			
+		- 2.Non-Primitive (derived / user-defined)
+		
+			1. Linear Data Structures (elements in a sequence)
+				- Array (static, contiguous memory)
+					- Array is a collection of similar type values stored one after another in memory and accessed using index numbers.
+					- Static Array = int[] arr = new int[5];
+					- Dynamic Array (List) = List<int> list = new List<int>();
+ 
+				- Linked List (dynamic, non-contiguous)
+					- A linked list is a linear data structure in which elements are stored in separate nodes, 
+					  and each node contains data and a reference (pointer) to the next node in memory.
+					- Singly Linked List - Each node has: Data Pointer to next node 
+					- Doubly Linked List - Each node:Data Next Previous
+					- Circular Linked List - Last node points to first
+					
+				- Stack (LIFO)
+					- A stack is a linear data structure that follows the principle of LIFO (Last In First Out),
+ 					  where insertion and deletion are performed only from one end called the top.
+					- Push (Insert) stack.Push(10);
+					- Pop (Delete) stack.Pop();
+					- Peek (Top element) stack.Peek(); Peek = just look To see the top element, not delete.
+					
+				- Queue / Deque (FIFO / both-ends)
+					- A queue is a linear data structure that follows the principle of FIFO (First In First Out), 
+					  where insertion happens at the rear and deletion happens from the front.
+					- q.Enqueue(10);
+					- Deque (Double Ended Queue) 
+						- A deque is a linear data structure in which insertion and deletion can be performed 
+						  from both the front and the rear.
+						- deque.AddFirst(10);
+						- deque.AddLast(20);
+					- Types of Queue
+						Simple Queue
+						Circular Queue
+						Priority Queue
+						Deque
+					- Real systems - RabbitMQ,Kafka,Redis(deque)
+					
+				- String (often treated as linear)
+					
+
+			2. Non-Linear Data Structures (hierarchical / network)
+				- Trees
+					- A tree is a non-linear data structure that stores elements in a hierarchical manner, 
+					  where each node can have zero or more child nodes, and there is exactly one root node.
+					- Binary Tree 
+						- Each node has at most 2 children.
+						    10
+						   /  \
+						  5   20
+
+					- Binary Search Tree(BST)
+						- A binary search tree is a binary tree where: 
+						- Left subtree contains smaller values
+						- Right subtree contains greater values
+							        50
+								   /  \
+								 30    70
+
+													
+					- Heap
+						- A heap is a complete binary tree that follows heap property.
+						- Types of Heap
+						- Min Heap Parent ≤ Children
+								      5
+									 / \
+								   10  20
+						- Max Heap Parent ≥ Children
+							  20
+							 / \
+						   10   5
+						   
+					- B-Tree / B+ Tree
+						- A multi-level tree where each node can have more than two children.
+						- Used in:
+							Databases
+							File systems
+							     [10 | 20]
+							   /    |     \
+							 [5]  [15]   [25]
+
+					- Trie (Prefix Tree)
+						- A tree used to store strings where each node represents a character.
+						- Used in:
+							Auto-complete
+							Spell check
+						
+					- AVL 
+						- An AVL tree is a self-balancing binary search tree in which the 
+						  difference in height between the left and right subtrees of any node is at most 1.
+						  
+				- Graphs
+					- Directed/Undirected, Weighted/Unweighted
+					- A graph is a non-linear data structure consisting of a 
+					  set of vertices (nodes) and a set of edges (connections) that connect pairs of vertices.
+					- Types of Graphs
+						1. Undirected Graph = Edges have no direction. A ---- B eg. Facebook friends
+							Means:
+								A is connected to B
+								B is connected to A
+						2. Directed Graph (Digraph) = Edges have direction. A ---> B eg. Instagram follow
+							Means:
+								A influences B
+								But B does not influence A 
+								
+					- Graph Traversal
+						Traversal = visiting all nodes.		
+							1. BFS (Breadth First Search)
+								Level by level.
+								Flow:
+									Visit all neighbors first
+									Then neighbors of neighbors
+									
+							2. DFS (Depth First Search)
+								Go deep first.
+								Flow:
+									Go as far as possible
+									Then backtrack
+						
+				- Hashing
+					- Hashing is a technique used to convert a given key into a 
+					  fixed-size value (called a hash) using a hash function, so that data can be stored and retrieved efficiently.
+					- Hash Function - A hash function is a function that takes an input (key) and returns an integer (hash value).
+						Key: "India"
+						Hash: 42
+					- Meaning: Store "India" at index 42.
+					- Hash Table - A hash table is a data structure that stores key-value pairs using hashing.
+					
+			
+		- Searching
+			- Searching is the process of finding a specific element in a collection of data.
+			1. Linear Search - Linear search checks each element one by one until the target is found.
+			2. Binary Search- Binary search repeatedly divides the data into halves to find the element.
+				Flow
+					Check middle
+					If smaller → go left
+					If bigger → go right
+					Repeat
+			3. BST search
+			- eg .
+				        50
+					   /  \
+					 30    70
+					/ \    / \
+				  20  40  60  80
+				  
+				1. Inorder Traversal (L → Root → R)
+					- Left → Root → Right
+					- 20 → 30 → 40 → 50 → 60 → 70 → 80
+
+				2. Preorder Traversal (Root → L → R)
+					- Root first, then children.
+					- 50 → 30 → 20 → 40 → 70 → 60 → 80
+					
+				3. Postorder Traversal (L → R → Root)
+					- Children first, then parent.
+					- 20 → 40 → 30 → 60 → 80 → 70 → 50
+				
+		- Sorting
+			- Sorting is the process of arranging data in a specific order, usually ascending or descending.
+			- Types of Sorting
+				1. Bubble Sort 
+					- Repeatedly swaps adjacent(next) elements if they are in wrong order.
+					- Largest elements "bubble" to the end.
+					- Time: O(n²)
+				2. Selection Sort 
+					- Selects the smallest element and places it at correct position.
+					- Time: O(n²)
+				3. Insertion Sort
+					- Builds sorted list one element at a time.
+					- Like arranging playing cards.
+					- Time: O(n²) worst
+				4. Merge Sort
+					- Divides data into halves, sorts them, then merges.
+					- Divide and conquer.
+					- Time: O(n log n)
+				5. Quick Sort
+					- Selects a pivot and partitions data around it.
+					- Average: O(n log n)
+				6. Heap Sort
+					- Uses heap structure to extract min/max repeatedly.
+					- Time: O(n log n)
+			
+
+2.Time Complexity
+
+	- Time Complexity describes how the execution time grows as the input size increases.
+	- It’s expressed using Big-O notation.
+
+	| Big-O      | Name         | Meaning           |
+	| ---------- | ------------ | ----------------- |
+	| O(1)       | Constant     | Same time always  |
+	| O(log n)   | Logarithmic  | Divide & conquer  |
+	| O(n)       | Linear       | Loop once         |
+	| O(n log n) | Linearithmic | Efficient sorting |
+	| O(n²)      | Quadratic    | Nested loops      |
+	| O(2ⁿ)      | Exponential  | Recursion heavy   |
+	| O(n!)      | Factorial    | Permutations      |
+
+	// O(n)
+	for(int i = 0; i < n; i++)
+	{
+		Console.WriteLine(i);
+	}
+	// O(n²)
+	for(int i = 0; i < n; i++)
+	{
+		for(int j = 0; j < n; j++)
+		{
+			Console.WriteLine(i + j);
+		}
+	}
+
+3.Space Complexity (SC)
+	- Space Complexity measures extra memory used by the algorithm.
+	Includes:
+		Variables
+		Arrays
+		Recursion stack
+		Data structures
+		
+	// O(1) space
+	int sum = 0;
+	for(int i = 0; i < n; i++)
+	{
+		sum += i;
+	}
+	
+	// O(n) space
+	int[] arr = new int[n];
+
+	| Method          | Time     |
+	| --------------- | -------- |
+	| From first page | O(n)     |
+	| Binary search   | O(log n) |
+	
+	| Case         | Meaning              |
+	| ------------ | -------------------- |
+	| Best Case    | Minimum time         |
+	| Average Case | Typical              |
+	| Worst Case   | Maximum time (Big-O) |
+
+	Example: Searching in array
+	Best: first element
+	Worst: last element → O(n)
+
+			
+Angular			
+-----------------------------------------------------------------------------------------------------------------------------------------
+angular.json (Project Configuration File)
+
+What is NPM?
+
+NPM (Node Package Manager) is the default package manager for Node.js.
+It is used to download, manage, and run JavaScript libraries/tools that your project depends on.
+
+In simple words:
+
+NPM = App store for JavaScript packages
+		
+
+package-lock.json is automatically generated by npm.
+
+package.json is the main project configuration file. It tells the package manager (like npm) what dependencies your project needs.	
+
+angular.json is a configuration file for an Angular project.
+It tells the Angular CLI how to build, serve, and run the application.
+
+A polyfill is code that adds support for features that browsers may not support natively. So polyfills make modern JavaScript work in older browsers.
+
+Zone.js is a library Angular uses to track asynchronous operations.Angular detects changes automatically using Zone.js.
+
+In modern Angular, important concepts include standalone components, signals for state management, improved template control flow, 
+dependency injection improvements, RxJS for asynchronous programming, and advanced routing with lazy loading and guards.
+
+	
+1. What is Angular?
+	- Angular is a front-end framework (by Google) used to build Single Page Applications (SPA).
+	
+spa - A Single Page Application is a web application that loads a single HTML page and dynamically updates the content using JavaScript without refreshing the entire page.
+
+2.Why Angular exists?
+	Before Angular:
+		Full page reload for everything
+		jQuery manipulating DOM manually
+		Messy JS files
+
+	Angular gives:
+		Component-based structure
+		Two-way data binding
+		Dependency Injection
+		Routing
+		State management
+				
+			
+3.Flow - 
+	1. Browser loads index.html and sees <app-root>.
+	2. JavaScript bundles load and main.ts executes.
+	3. main.ts bootstraps AppModule.
+	4. AppModule bootstraps AppComponent.
+	5. Angular finds <app-root> in DOM.
+	6. Angular replaces <app-root> with AppComponent template.
+	7. Angular application becomes active.
+					
+4.Angular is written in TypeScript	
+	- TypeScript = JavaScript + types (like C#)
+		let age: number = 30;
+		let name: string = "Anurag";
+	- Very similar to C#:
+		int age = 30;
+		string name = "Anurag";
+
+5.Component
+	- Angular components are the building blocks of Angular applications.
+	- Angular = tree of components
+	- Each component has:
+		.ts → logic
+		.html → UI
+		.css → styles
+	
+	| Concept         | Meaning                    |
+	| --------------- | -------------------------- |
+	| selector        | Custom HTML tag            |
+	| template        | UI                         |
+	| component class | Controller logic           |
+	| inputs/outputs  | Parent-child communication |
+
+AppModule -
+	- AppModule is the root module of an Angular application.
+	- declarations=allcomponent
+	- imports=BrowserModule,AppRoutingModule,ReactiveFormsModule,HttpClientModule
+	- providers=interceptors
+	- bootstrap=AppComponent
+
+6.Data Binding
+	- Data Binding is the mechanism that connects the component (TypeScript) and the template (HTML).
+	- maunal dom work problem solve $('#name').text(user.name);
+
+- 4 Types - 
+	- 1. Interpolation (One-way: TS → HTML)
+		HTML = <h1>{{ username }}</h1>
+		TS = username = "John";
+		
+	- 2. Property Binding  (One-way: TS → HTML)
+		TS - isDisabled = true;
+		HTML - <button [disabled]="isDisabled">Save</button>
+
+	- 3. Event Binding 
+		html - <button (click)="login()">
+		TS - login() {
+		  console.log("Login clicked");
+		}
+		
+	- 4. Two-Way Binding 
+		- TS - username = '';
+		HTML - 
+		<input [(ngModel)]="username">
+		<p>{{username}}</p>
+
+7. Directives (Control the DOM)
+	- Directives = special instructions in HTML.
+	- *ngIf <div *ngIf="isLoggedIn">Welcome</div>
+	- *ngFor <li *ngFor="let u of users">{{u.name}}</li>
+	- Attribute (change behavior) <input [ngClass]="isError ? 'red' : 'green'">
+
+8.Services & Dependency Injection
+	- A Service is a class that contains business logic or shared functionality that is independent of the UI.
+	- Services = business logic layer
+	-	@Injectable()
+		export class OrderService {
+		  getOrders() {
+			return this.http.get('/api/orders');
+		  }
+		}
+	- Dependency Injection - Dependency Injection means Angular creates objects for you and injects them where needed.
+	- Injected into component:
+		- constructor(private orderService: OrderService) {}
+	- Use @Injectable() and inject via constructor.
+	- What is providedIn: 'root'?	Registers the service globally.
+
+
+9. Routing (SPA navigation)
+	- URL changes → Angular loads a different component → no full page reload
+	- No page reload.
+	const routes = [
+	  { path: 'login', component: LoginComponent },
+	  { path: 'orders', component: OrderComponent }
+	];
+	
+	<a routerLink="/orders">Orders</a>
+	<router-outlet></router-outlet>
+ 
+	- RouterModule.forRoot() vs forChild()?	forRoot() for root module, forChild() for feature modules.	
+	AppRoutingModule vs FeatureRoutingModule
+
+10.Lifecycle hooks
+	- Lifecycle hooks are methods that Angular calls at specific moments in a component’s life.
+	- They let you run your code when:
+		component is created
+		template is rendered
+		data changes
+		component is destroyed
+	
+	1. constructor()
+		- Only for Dependency Injection
+	
+	2.ngOnInit()
+		- Initialization,API calls,Default data loading
+		
+	3. ngAfterViewInit()
+		- DOM is ready,Access ViewChild,Third-party libraries
+	
+	4. ngOnDestroy()
+		- Cleanup,Unsubscribe,Clear timers
+		
+	-- Hooks for Data Change
+	1. ngOnChanges()
+		- Runs when @Input changes.
+		-Used in: Parent → child updates
+	2. ngDoCheck()
+		- Custom change detection.
+	
+
+11.Observables
+	- An Observable is a stream of data that arrives over time.
+	- Instead of getting one value, you subscribe to a flow of values.
+	- Observable = Event + Stream + Async combined
+	
+	this.orderService.getOrders()
+	  .subscribe(data => {
+		this.orders = data;
+	  });
+	
+	- subscribe - subscribe() is the method that starts listening to an Observable and executes your code when data is emitted.
+	- Without subscribe(), nothing happens.
+	
+	Think like this:
+		Observable = YouTube channel
+		subscribe() = You click “Subscribe”
+		next value = New video notification
+	
+	What is a Promise?
+		- A Promise represents a single asynchronous result that resolves or rejects in the future.
+	
+	Difference from Observable?
+		- Promise emits one value and cannot be cancelled, Observable emits multiple values and is cancellable.
+
+ 
+12.RxJS
+	- RxJS (Reactive Extensions for JavaScript) is a library for working with asynchronous data streams using Observables.
+	- RxJS is the engine that powers Observables.
+	
+	Promise → bottle
+	Observable → pipeline
+	RxJS → the entire water system (filters, valves, meters, pipes)
+
+ 
+13.Forms
+	- Angular has two form systems:
+	- 1. Template-driven
+		- Small, simple forms
+		- import { FormsModule } from '@angular/forms';
+		- <form #f="ngForm" (ngSubmit)="save(f)">
+		  <input name="username" ngModel required>
+		  <input name="password" ngModel type="password">
+		  <button>Login</button>
+		  </form>
+	
+	- 2. Reactive Forms
+		- Reactive forms are model-driven.
+		- You build form in TS, bind in HTML.
+		- import { ReactiveFormsModule } from '@angular/forms';
+		- this.form = this.fb.group({
+			  username: ['', Validators.required],
+			  password: ['', Validators.minLength(6)]
+			});
+			
+		<form [formGroup]="form" (ngSubmit)="login()">
+		  <input formControlName="username">
+		  <input formControlName="password" type="password">
+		  <button>Login</button>
+		</form>
+		
+	- FormGroup
+		- FormGroup is an object that represents the entire form as a single unit.
+		- FormGroup = the form model in TypeScript
+		
+	- FormGroupDerective 
+		- to get nested form group from parent.
+		
+14.HTTP
+	- Angular HTTP is handled by HttpClient, which allows Angular to communicate with backend APIs using Observables.
+
+15.Guards
+	- A Guard decides whether navigation to a route is allowed.
+	- Guards = security at the door
+	
+	@Injectable({ providedIn: 'root' })
+	export class AuthGuard {
+
+	  canActivate(): boolean {
+		return this.authService.isLoggedIn();
+	  }
+	}
+
+	{ path: 'employee-list', component: ListComponent, canActivate: [AuthGuard] },
+
+	Types =
+	| Guard         | Purpose               |
+	| ------------- | --------------------- |
+	| canActivate   | Can enter route?      |
+	| canDeactivate | Can leave route?      |
+	| canLoad       | Can lazy module load? |
+	| resolve       | Preload data          |
+
+16. Interceptors (HTTP Middleware)
+	- An Interceptor sits between your app and backend and modifies requests/responses.
+	- JWT Interceptor
+	
+	
+17.Pipe
+	- A Pipe is a function that transforms data in the template before displaying it.
+	- Pipe = Formatter for UI
+	- They do not change real data, only how it looks.
+	- {{ value | pipeName }}
+	- Built-in Pipes
+	- {{ orderDate | date:'dd/MM/yyyy' }}
+	- {{ name | uppercase }} {{ name | lowercase }}
+	- Custom Pipe - status (0 - active,1-inactive)
+	
+	- Pure vs Impure Pipes
+	- Pure (default) - Runs only when input changes.
+	
+	- Impure
+	- Runs on every change detection.
+	- @Pipe({ name: 'filter', pure: false })
+
+18.How parent and child components exchange data
+	
+	1. @Input – Parent → Child
+		- @Input allows a parent component to pass data into a child component.
+		Child Component 
+		
+	2. @Output – Child → Parent
+		- @Output allows a child component to send data/events to its parent.
+	
+	3. EventEmitter – The Messenger
+		- EventEmitter is a class used to emit custom events from child to parent.
+		
+19.change detection
+	- Change Detection is the mechanism Angular uses to detect changes in data and update the DOM automatically.
+	- It is the process by which Angular checks for data changes and updates the view.
+	- What triggers it? Any async event like HTTP, click, timer.
+	- What is OnPush? A strategy that limits change detection to improve performance.
+	- Why immutable data? Because OnPush detects only reference changes.
+	
+	- How to improve Angular performance?	Use OnPush, lazy loading, trackBy, caching.
+	
+- How to handle form validation?	Use Validators in reactive forms.	Validators.required
+
+20.AOT
+	- AOT (Ahead-Of-Time) compilation means Angular compiles your templates into JavaScript at
+    	build time instead of at runtime in the browser.
+	- Angular does the heavy work before deployment, not in the user’s browser.
+	
+21.JIT
+	- JIT (Just-In-Time) compilation means Angular compiles templates in the browser at runtime.
+	- Angular ships raw templates to the browser and compiles them when the app loads.
+	
+22.Eager Loading (Default)
+	- Eager loading loads all modules and components when the app starts.
+	
+23.Lazy Loading (Real-world)
+	- Lazy loading loads code only when the route is visited.
+	
+	Eager:
+		Download whole movie before watching.
+	Lazy:
+		Netflix streaming — download episode only when you play it.
+
+
+
+23.Latest angular version
+	- 21.1.1
+	
+24.Subject
+	What is a Subject?
+	A Subject is both an Observable and an Observer.
+	Subject → water tank with pipes connected
+	
+	Why use Subject?
+	To share data between multiple subscribers.
+
+	BehaviorSubject?
+	A Subject that stores and emits the latest value.
+
+	Subject vs Observable?
+	Observable is read-only, Subject is read-write.	 
+  
+Scenario
+You are on a Profile page.
+You change your profile photo.
+The top header (avatar) updates instantly.
+
+These two components:
+ProfileComponent
+HeaderComponent
+
+I would use a shared service with a BehaviorSubject to store the current user state.
+When the profile photo is updated, the service emits the new user object, and the 
+header component subscribes to it and updates automatically.
+ 
+Service = API calls + state store
+Components = just subscribers
+
+
+25.ActivatedRoute - Gives information about the current route.
+
+26.patchValue = Partial update. vs setValue = All fields required.
+
+27.not using singal topic because it was introuduced in 17
+
+28.A decorator in Angular is a function prefixed with @ that adds metadata to a class or property so Angular knows how to process it.
+@Injectable() is a decorator that tells Angular:
+
+This class can participate in Angular’s Dependency Injection (DI) system.
+
+
+SQL
+----------------------------------------------------------------------------------------------------------------------------------------
+1.how to insert 10k data
+
+| Method                       | When to use         | Why important               |
+| ---------------------------- | ------------------- | --------------------------- |
+| Loop Insert (RBAR)           | Almost never        | To explain what *not* to do |
+| Multi-row INSERT             | Very small data     | Quick scripts               |
+| Table-Valued Parameter (TVP) | APIs (1k–50k)       | Clean, typed, safe          |
+| SqlBulkCopy                  | Large data (50k–1M) | Fastest from .NET           |
+| BULK INSERT                  | Offline / ETL       | Fastest inside SQL          |
+
+2.if from sql 
+	- BULK INSERT = Data is in CSV / flat file
+		BULK INSERT Orders
+		FROM 'C:\orders.csv'
+		WITH (
+			FIELDTERMINATOR = ',',
+			ROWTERMINATOR = '\n',
+			FIRSTROW = 2
+		);
+
+	- OPENROWSET (modern version)
+
+3.where and  having with eg
+4.window function - use case
+5.what is cte 
+6.normalization,demnormalization
+7.corelated subquery
+8.work on subquery,join of subquery
+1. Find the Nth highest salary
+2. Find employees earning more than their department’s average
+5. Get top 3 salaries per department
+
+
+
+
+JavaScript & JQuery
+----------------------------------------------------------------------------------------------------------------------------------------
+1.var (Old – function scoped)
+	- Function scoped
+	- Can be redeclared
+	- Can be reassigned
+	- Gets hoisted (initialized as undefined
+
+	Eg - 
+		function testVar() {
+			if (true) {
+				var x = 10;
+			}
+			console.log(x); // 10 (accessible outside block)
+		}
+		testVar();
+		
+		Redeclare allowed:
+			var a = 5;
+			var a = 20;
+			console.log(a); // 20
+
+		Hoisting:
+			console.log(b); // undefined
+			var b = 10;
+
+	Bug - 
+		for (var i = 0; i < 3; i++) {
+			setTimeout(() => {
+				console.log(i);
+			}, 1000);
+		}
+		// Output: 3 3 3
+
+
+2. let (Modern – block scoped)
+	- Block scoped { }
+	- Cannot be redeclared in same scope
+	- Can be reassigned
+	- Hoisted but in Temporal Dead Zone (TDZ)
+	
+	- Eg. 
+		function testLet() {
+			if (true) {
+				let y = 10;
+			}
+			console.log(y); // ❌ Error: y is not defined
+		}
+		
+		Reassign allowed:
+			let a = 5;
+			a = 20;
+			console.log(a); // 20
+
+		TDZ:
+			console.log(c); // ❌ Error
+			let c = 10;
+
+		
+		Bug in var fixed in let -
+			for (let i = 0; i < 3; i++) {
+				setTimeout(() => {
+					console.log(i);
+				}, 1000);
+			}
+			// Output: 0 1 2
+		
+		- let is block scoped, var is function scoped.
+		
+		
+3. const (Constant reference)
+
+	- Block scoped
+	- Cannot be redeclared
+	- Cannot be reassigned
+	- Must be initialized
+	- For objects/arrays → reference is constant, not values		
+	
+	- Eg.
+		const x = 10;
+		x = 20; // ❌ Error
+	
+		With object:
+			const user = { name: "Anurag" };
+			user.name = "Rahul";   // ✅ Allowed
+			user = {};             // ❌ Error
+
+		With array:
+			const arr = [1,2,3];
+			arr.push(4);  // ✅
+			arr = [];     // ❌
+
+Use const by default, let if value changes, avoid var.
+
+4.What is Hoisting
+	- Hoisting is JavaScript’s behavior of moving declarations to the top of scope before execution.
+	- console.log(a); // undefined
+	  var a = 10;
+
+5.Difference between == and ===
+
+	| ==               | ===               |
+	| ---------------- | ----------------- |
+	| Loose comparison | Strict            |
+	| Type conversion  | No conversion     |
+	| "5" == 5 → true  | "5" === 5 → false |
+
+	- Always use === in real projects.
+	
+	
+6.What is Closure?
+
+	- A closure is when a function remembers variables from its parent scope even after the parent function has finished.
+	- Closures keep variables in memory.
+	- Scope = room where variable lives
+	- Closure = lock that keeps the room from being destroyed
+
+	- Used in: data privacy, caching, debounce.
+		function counter() {
+		  let count = 0;
+		  return function () {
+			return ++count;
+		  }
+		}
+	- eg.Closure for Data Hiding (Encapsulation)
+		function bankAccount(balance) {
+			return {
+				deposit(amount) {
+					balance += amount;
+				},
+				getBalance() {
+					return balance;
+				}
+			};
+		}
+
+		const acc = bankAccount(1000);
+		acc.deposit(500);
+		console.log(acc.getBalance()); // 1500
+
+	
+7.What is this?
+	- this refers to the object that is calling the function.
+	const user = {
+		name: "Anurag",
+		greet() {
+			console.log(this.name);
+		}
+	};
+
+	user.greet();
+	
+8.What is Event Loop?
+	- The event loop decides when async code runs.
+	- eg.setTimeout
+	
+9.What is a Promise?
+	- A Promise is an object that represents the eventual completion or failure of an asynchronous operation.
+	Has 3 states:
+		Pending
+		Fulfilled
+		Rejected
+	
+	- Used with .then() and .catch()
+
+10.What is async/await?
+	- async/await is a modern syntax used to work with Promises in a more readable and synchronous-looking way.
+
+Both Promise and async/await are the same in functionality; async/await is just syntactic sugar over Promises.
+
+11.Shallow vs Deep Copy
+	- Shallow copies share references, deep copies don’t.
+	- Shallow copy → both objects point to the same nested objects
+	- Deep copy → completely independent memory
+
+12.map vs forEach
+	- map is for data transformation, forEach is for iteration.
+	| map                | forEach        |
+	| ------------------ | -------------- |
+	| Returns new array  | No return      |
+	| Used for transform | Used for loops |
+	| Chainable          | Not chainable  |
+
+13.What is Prototype?
+Every JS object has a hidden property [[Prototype]]
+Used for inheritance
+
+14. What is Debounce?
+	- Debounce delays execution until user stops action.
+		Used in:
+			Search box
+			Resize
+			Scroll
+
+15.What is Throttle?
+	Throttle limits execution to once per time interval.
+
+	Used in:
+		Button clicks
+		Infinite scroll
+
+	Without throttle:This runs hundreds of times per second.
+	With throttle (every 1 second):No matter how fast you scroll It logs once per second
+
+
+	| Throttle                    | Debounce                  |
+	| --------------------------- | ------------------------- |
+	| Executes at fixed intervals | Executes after user stops |
+	| Good for continuous events  | Good for final action     |
+	| Eg: scroll position         | Eg: search box            |
+
+16.slice() vs splice() (Classic)
+	| Feature                 | slice          | splice                         |
+	| ----------------------- | -------------- | ------------------------------ |
+	| Modifies original array | ❌ No           | ✅ Yes                          |
+	| Return                  | New array      | Removed elements               |
+	| Purpose                 | Copy / extract | Add / remove                   |
+	| Parameters              | (start, end)   | (start, deleteCount, items...) |
+
+
+JQuery
+------------------------------------------------------------------------------------------------------------------------------------------------------
+1. What is Event Delegation in jQuery?
+	Attaching event to parent instead of child.
+	$("#list").on("click", "li", function(){});
+	Works for dynamically added elements.
+
+
+2.on() vs click()
+| on                         | click         |
+| -------------------------- | ------------- |
+| Works for dynamic elements | Only existing |
+| Event delegation           | No delegation |
+
+3..prop() vs .attr()
+
+| prop             | attr       |
+| ---------------- | ---------- |
+| Current state    | HTML value |
+| checkbox checked | initial    |
+
+
+HTML & CSS
+------------------------------------------------------------------------------------------------------------------------------------------------------
+DropDownListFor – What HTML it Generates?
+
+	@Html.DropDownListFor(
+	   m => m.StudentDrp,
+	   Model.GetStudentList(),
+	   "Select Student"
+	)
+
+	<select id="StudentDrp" name="StudentDrp">
+		<option value="">Select Student</option>
+		<option value="1">John</option>
+		<option value="2">David</option>
+	</select>
+
+What is !important?
+	It forces a style to override all other CSS rules
+
+
+scss
+SCSS allows features like nesting, variables, mixins, etc., and it is compiled into CSS before the browser loads it.
+
+
+MVC
+---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+Extra questions
+---------------------------------------------------------------------------
+
+UseRouting() + UseEndpoints() before UseOcelot() so controllers get first priority
+Ocelot only intercepts routes that don't match any controller
+Correct middleware order: Routing → Auth → Endpoints → Ocelot
+
+Mediator + CQRS
+
+1) HTTP Request → Controller
+2) Controller creates Command object
+3) Controller sends Command to Mediator
+4) Mediator finds Validator and runs it
+5) If valid → Mediator calls Handler
+6) Handler executes business logic (uses repository, token, etc.)
+7) Handler returns response
+8) Mediator returns response to Controller
+9) Controller returns HTTP response to client
+
+
+---------------------------------------------------------------------------------------------
+RabbitMQ
+RabbitMQ is a message broker — it transfers messages between services asynchronously.
+
+Producer — sends a message (job request) to RabbitMQ.
+
+Queue — temporary storage where messages wait for processing.
+
+Consumer (Worker) — background service that processes messages.
+
+Message — data payload (your ReportJobMessage).
+
+Broker — RabbitMQ server managing queues and routing.
+
+Exchange & Routing
+
+Exchange — routes messages from producer to correct queue.
+
+Routing Key — address label used by exchange to decide destination queue.
+
+Default Direct Exchange — built-in exchange where routingKey = queueName.
+
+Your Implementation Mapping
+
+Controller — Producer trigger
+RabbitMqPublisher — sends message
+report_jobs queue — stores report requests
+ReportJobConsumer — worker processes report
+DB status tracking — Pending → InProgress → Done/Failed
+ACK after processing — ensures no duplicate execution
+
+
+| Exchange       | Behavior         | Real Example               |
+| -------------- | ---------------- | -------------------------- |
+| Default/Direct | 1 → 1            | Report job                 |
+| Fanout         | 1 → many         | Send notifications         |
+| Topic          | Pattern routing  | Event-driven microservices |
+| Headers        | Metadata routing | Rare                       |
+
+
+---------------------------------------------------------------------------------------------
+Redis
+What Redis is
+
+Redis is an in-memory database used mainly as a cache to make reads extremely fast.
+
+Redis — an in-memory key-value data store used mainly for caching and fast data access.
+
+In-Memory Storage — data is stored in RAM so reads are extremely fast.
+
+Distributed Cache — shared cache accessible by multiple application servers.
+
+Source of Truth — database remains permanent storage, Redis is only a performance layer.
+
+Expiration & Memory Control
+
+TTL (Time To Live) — automatic key expiry after specified time.
+
+Absolute Expiration — key removed after fixed duration.
+
+Key Design
+
+Key Naming Convention — structured keys like tracking:{awbNo} for targeted invalidation.
+
+
+---------------------------------------------------------------------------------------------
+
+NUnit – Unit Testing Framework for .NET
+
+NUnit is a unit testing framework for .NET used to test individual methods, classes, or components in isolation.
+It ensures your code works correctly, prevents regressions, and improves maintainability.
+
+1. Test Fixture
+
+A class marked with `[TestFixture]` indicating it contains unit tests.
+
+[TestFixture]
+public class CalculatorTests
+{
+}
+
+2. Test Methods
+
+Each method that should be executed as a test is marked with [Test].
+
+[Test]
+public void Add_ReturnsCorrectSum()
+{
+}
+
+## 3. Assertions
+
+Assertions verify expected outcomes.
+
+Assert.AreEqual(expected, actual);
+Assert.IsTrue(condition);
+Assert.IsFalse(condition);
+Assert.Throws<TException>(() => method());
+Assert.That(value, Is.EqualTo(expected));
+
+4. Setup and Teardown
+
+Used to initialize objects before each test and clean up after each test.
+
+[TestFixture]
+public class CalculatorTests
+{
+    private Calculator _calc;
+
+    [SetUp]
+    public void Init()
+    {
+        _calc = new Calculator();
+    }
+
+    [TearDown]
+    public void Cleanup()
+    {
+        _calc = null;
+    }
+}
+
+5. Testing a Calculator Class
+
+Class Under Test
+
+public class Calculator
+{
+    public int Add(int a, int b) => a + b;
+
+    public int Divide(int a, int b)
+    {
+        if (b == 0)
+            throw new DivideByZeroException();
+
+        return a / b;
+    }
+}
+
+Test Class
+
+[TestFixture]
+public class CalculatorTests
+{
+    private Calculator _calc;
+
+    [SetUp]
+    public void Setup()
+    {
+        _calc = new Calculator();
+    }
+
+    [Test]
+    public void Add_WhenCalled_ReturnsCorrectResult()
+    {
+        int result = _calc.Add(3, 5);
+        Assert.AreEqual(8, result);
+    }
+
+    [Test]
+    public void Divide_ByZero_ThrowsException()
+    {
+        Assert.Throws<DivideByZeroException>(() => _calc.Divide(10, 0));
+    }
+}
+
+---
+
+6. Parameterized Tests
+
+Run the same test with multiple inputs.
+
+[TestCase(2, 3, 5)]
+[TestCase(10, 20, 30)]
+[TestCase(-1, -1, -2)]
+public void Add_WithMultipleInputs_ReturnsExpected(int a, int b, int expected)
+{
+    var calc = new Calculator();
+    Assert.AreEqual(expected, calc.Add(a, b));
+}
+
+7. Mocking Dependencies
+
+NUnit does **NOT** provide mocking.
+Use libraries like **Moq** or **NSubstitute**.
+
+ Example Scenario
+
+Service depends on a repository.
+
+public interface IUserRepository
+{
+    User GetUser(int id);
+}
+
+public class UserService
+{
+    private readonly IUserRepository _repo;
+
+    public UserService(IUserRepository repo)
+    {
+        _repo = repo;
+    }
+
+    public string GetUserName(int id)
+    {
+        var user = _repo.GetUser(id);
+        return user?.Name;
+    }
+}
+
+Test with Moq
+
+[TestFixture]
+public class UserServiceTests
+{
+    [Test]
+    public void GetUserName_ReturnsCorrectName()
+    {
+        // Arrange
+        var mockRepo = new Mock<IUserRepository>();
+        mockRepo.Setup(r => r.GetUser(1))
+                .Returns(new User { Name = "John" });
+
+        var service = new UserService(mockRepo.Object);
+
+        // Act
+        var result = service.GetUserName(1);
+
+        // Assert
+        Assert.That(result, Is.EqualTo("John"));
+    }
+}
+
+Deep Understanding
+
+Mocking:
+
+* Removes external dependencies (DB, API, filesystem)
+* Makes tests fast and repeatable
+* Ensures isolation
+* Tests only business logic, not infrastructure
+
+---
+
+8. Category & Ignored Tests
+
+Group Tests
+
+[Test, Category("Critical")]
+public void CriticalFeatureTest()
+{
+}
+
+ Ignore Tests
+
+[Ignore("Pending fix")]
+public void FutureTest()
+{
+}
+
+9. One-Time Setup / Teardown
+
+Runs once for the entire test class.
+
+[OneTimeSetUp]
+public void OneTimeInit()
+{
+    // Runs once before all tests
+}
+
+[OneTimeTearDown]
+public void OneTimeCleanup()
+{
+    // Runs once after all tests
+}
+
+10. Coverage Tools
+
+Improve reliability and maintainability.
+
+Common tools:
+
+* **dotCover**
+* **NCover**
+* **Visual Studio Coverage**
+* **SonarQube**
+
+**SonarQube** is a continuous code quality and security analysis platform.
+
+Difference between CPU-bound and IO-bound operations?
+
+CPU-bound tasks depend on CPU processing power, like calculations or encryption.
+IO-bound tasks depend on external resources like database, file system, or network.
+For IO-bound tasks, we use async/await to improve scalability. For CPU-bound tasks, we use multi-threading or parallel programming.
+
+
+
+
+
+
+HR
+----------------------------------------------------------------------------------------------------------------------------------------
+1.Tell me about yourself?
+Software engineer → logistics → started MVC/WinForms → now ASP.NET Core → Angular UI → mentor juniors → APIs + cloud + Redis/RabbitMQ
+
+-> Software developer,busisoft infotech,courier domain----------
+- Thank you for the opportunity. Talking about my career journey, I started working as a software developer in .NET at BusiSoft Infotech, 
+  mainly in the courier and logistics domain.
+
+-> webapplication,webform,winform,sql,dotnet core----------
+- Initially, I worked on web applications built using .NET Framework, web forms , WinForms, and SQL Server. Over time, 
+  I transitioned into .NET Core and started focusing more on backend development.
+
+-> html,razor,angularjs,angular----------
+- On the UI side, I started with HTML,Razor Pages and AngularJS, and currently I work with Angular.
+
+-> senior,mentoring,code reviews,system design----------
+- As a senior developer, I’m also involved in mentoring junior developers, doing code reviews, and contributing 
+  to system design.
+
+-> integrating fedex,razor,cloud aws,azure,whatsapp chatbot----------
+- I continuously work on integrating third-party APIs such as courier services like DHL and FedEx, and payment gateways 
+  like Stripe, Razorpay, and Easebuzz. I’ve also worked with cloud services like AWS and Azure, 
+  created and hosted SQL databases and applications, and implemented a WhatsApp chatbot for shipment tracking.
+
+-> performance,redis,rabit,resource optimization
+- Additionally, I’ve worked on performance and scalability aspects using Redis for caching and RabbitMQ 
+  for asynchronous processing, and I’m involved in internal initiatives around resource optimization and improving overall operational efficiency.
+
+
+
+2. Why Change?
+I’ve been with my current organization for around five years and it’s been a great learning journey. 
+I’ve worked across different parts of the system and gained strong hands-on experience. 
+Now I feel it’s the right time to explore new opportunities where I can work on larger-scale systems and continue growing both 
+technically and professionally.
+
+
+3.What is new in Dotnet?
+1. Unified & Cross-Platform
+	.NET is now a single unified platform for Web, APIs, Desktop, Mobile and Cloud.
+	Same runtime and libraries across Windows, Linux, and macOS.
+
+2. Performance Improvements
+	Every release focuses on runtime performance.
+	Faster startup, lower memory usage, better garbage collection and async performance.
+
+3. Minimal APIs
+	Introduced Minimal APIs for building lightweight services.
+	Less boilerplate compared to traditional controllers.
+	Very useful for microservices and serverless APIs.
+
+4. Native AOT (Ahead-of-Time Compilation)
+	Supports compiling apps into native binaries.
+	Results in very fast startup and smaller memory footprint.
+	Ideal for containers and cloud workloads.
+
+5. Cloud & Microservices First
+	Built-in support for Docker and Kubernetes.
+	Better logging, health checks, and observability.
+	Designed to be cloud-native and scalable.
+
+6. Continuous C# Language Enhancements
+	Modern C# features like records, pattern matching, init properties, required members.
+	Improves code readability, safety, and productivity.
+
+7. MAUI (for Mobile & Desktop)
+	.NET now includes MAUI (Multi-platform App UI).
+	Used to build Android, iOS, Windows, and macOS apps from a single C# codebase.
+
+ 
+
+---------------------------------------------------------------------------------------------
+Mediator + CQRS
+
+1) HTTP Request → Controller
+2) Controller creates Command object
+3) Controller sends Command to Mediator
+4) Mediator finds Validator and runs it
+5) If valid → Mediator calls Handler
+6) Handler executes business logic (uses repository, token, etc.)
+7) Handler returns response
+8) Mediator returns response to Controller
+9) Controller returns HTTP response to client
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+project
+
+---------------------------------------------------------------------------------------------
+RabbitMQ
+RabbitMQ is a message broker — it transfers messages between services asynchronously.
+
+Producer — sends a message (job request) to RabbitMQ.
+
+Queue — temporary storage where messages wait for processing.
+
+Consumer (Worker) — background service that processes messages.
+
+Message — data payload (your ReportJobMessage).
+
+Broker — RabbitMQ server managing queues and routing.
+
+Exchange & Routing
+
+Exchange — routes messages from producer to correct queue.
+
+Routing Key — address label used by exchange to decide destination queue.
+
+Default Direct Exchange — built-in exchange where routingKey = queueName.
+
+Your Implementation Mapping
+
+Controller — Producer trigger
+RabbitMqPublisher — sends message
+report_jobs queue — stores report requests
+ReportJobConsumer — worker processes report
+DB status tracking — Pending → InProgress → Done/Failed
+ACK after processing — ensures no duplicate execution
+
+
+| Exchange       | Behavior         | Real Example               |
+| -------------- | ---------------- | -------------------------- |
+| Default/Direct | 1 → 1            | Report job                 |
+| Fanout         | 1 → many         | Send notifications         |
+| Topic          | Pattern routing  | Event-driven microservices |
+| Headers        | Metadata routing | Rare                       |
+
+
+---------------------------------------------------------------------------------------------
+Redis
+What Redis is
+
+Redis is an in-memory database used mainly as a cache to make reads extremely fast.
+
+Redis — an in-memory key-value data store used mainly for caching and fast data access.
+
+In-Memory Storage — data is stored in RAM so reads are extremely fast.
+
+Distributed Cache — shared cache accessible by multiple application servers.
+
+Source of Truth — database remains permanent storage, Redis is only a performance layer.
+
+Expiration & Memory Control
+
+TTL (Time To Live) — automatic key expiry after specified time.
+
+Absolute Expiration — key removed after fixed duration.
+
+Key Design
+
+Key Naming Convention — structured keys like tracking:{awbNo} for targeted invalidation.
+
+---------------------------------------------------------------------------------------------
+
+MVC + Class Library -
+
+Projects - Xpresion,Warehouse,Control Panel, CRM,CMS, Axsis bank api,api integration,
+
+Configuration -
+-> Visual Studio 2017
+-> dotnet --version 7.0.201
+-> .NET framework 4.5
+-> SMSS - Microsoft SQL Server 2012
+-> SQL Server version
+Microsoft SQL Server 2016 (RTM) - 13.0.1601.5 (X64)
+Apr 29 2016 23:23:58
+Copyright (c) Microsoft Corporation
+Enterprise Edition (64-bit) on Windows Server 2019 Standard 6.3 <X64> (Build 17763: ) (Hypervisor)
+
+Structure -
+-> ASP.NET Web Application (.NET framework 4.5)
+-> MVC
+-> Entry Point for this is - Global.asax.cs
+- Application_Start
+- razor view enginge for ui
+- project contains web api as well so Registerd routes - config.Routes.MapHttpRoute
+- RegisterGlobalFilters not enabled
+- Registerd routes for mvc and also had mobile app so for that routes
+- RegisterBundles contains css and js which required in project - Improves page load performance
+- Used satic variables created in static class for handling flags on iis start it loads all flags
+ so that this can be used in project without instantiate.
+- Application_Error
+- if error occurs it will show in error page
+-> Angular
+- Controller files
+-> App_Start
+- Bundle,Filter,Route,WebAPIConfig
+-> BLL
+- Buisness Logic
+-> Content
+- css
+- javascript
+-> Controllers
+- MVC Controller
+-> DAL
+- dbhelper - db connections code
+- SqlCommand comm = new SqlCommand();
+- SqlConnection con = new SqlConnection();
+- SqlDataAdapter da = new SqlDataAdapter();
+- con.ConnectionString = GetConnectionString();
+- con.Open();
+- comm.CommandTimeout = 25000;
+- comm.CommandType = CommandType.StoredProcedure;
+- comm.CommandText = spName;
+- comm.Connection = con;
+foreach (var element in stringargs)
+{
+comm.Parameters.AddWithValue(element.Key, element.Value);
+}
+- da.SelectCommand = comm;
+- da.Fill(dst);
+
+-> Mobile App
+- View and angular controller js
+
+-> PaymentGateway
+- Gateways - EaseBuzz,RazorPay,Stripe,ICICI Pay,CCavenue
+- Interface - ProcessPayment, HandleResponse
+
+-> Scripts
+- js
+
+-> Views
+- cshtml
+- _ViewStart.cshtml = is a special Razor file in ASP.NET MVC that runs before every view is rendered.
+
+-> download.aspx,pdfreport.aspx - rpt printing in pdf
+
+-> manifest.json - project name,description
+
+-> packages.config - packages used in project eg. aws,razorpay
+
+-> serviceworker.js - used for pwa
+
+-> Web.config
+- connection string
+- ExcelConnect - provider - Microsoft.ACE.Oledb.12.0 - Microsoft.ACE.OLEDB.12.0 is commonly used to read Excel files into a DataTable (and also to write, if needed).
+- appsettings
+- assemblies
+- cors
+- sessionState
+- mode="InProc" - Session data is stored in the application’s memory (inside the IIS worker process).
+- Session timeout is 1440 minutes = 24 hours
+- others way - InProc(App memory),StateServer(Windows service),SQLServer(Database),Custom(Depends on provider)
+- One browser = one session
+- How ASP.NET Tracks Session Uses a cookie called ASP.NET_SessionId
+
+Flow
+-> Login Page
+- on success login user data like usercode,menus,origin,etc store in session
+- redirect to dashboard
+- features like - forgot/reset, otp login
+
+-> Master.cshtml
+- it contains header,footer,sidebars
+- Loads on every module page- before any page
+- Overrides _ViewStart.cshtml
+- Forces this view to use Master.cshtml
+- If not specified, layout comes from _ViewStart.cshtml
+- @Html.Partial("~/Views/Shared/_Menu.cshtml") partial view - @Html.Raw(Convert.ToString(""+ Session["usermenu"]))
+- @RenderBody() - It tells the layout page where the content of the current view should be rendered.
+- all css javascript used
+- Session["User_Code"] != null - checked username and session exists in table if not login error
+
+-> On every page
+- Controller -
+- [ExceptionFilter] - any exception on current page OnException
+- [ActionFilters] - OnActionExecuting = IsNewSession or User_Code null then logout,OnActionExecuted
+
+-> The session check in the action filter ensures security by blocking unauthorized requests,
+ while the same check in the layout prevents UI errors and controls display elements if the session expires.
+
+Features  
+-> Reports - in angular for dynamic data
+-> Import - bulk upload (excel to xml and then in base64)
+-> Image Upload Download in folder
+-> image or html conversion , image to pdf,etc
+-> html to pdf - NReco.PdfGenerator = HtmlToPdfConverter
+-> ZPL to png - ZPL stands for Zebra Programming Language. It is a printer control language used by Zebra label printers to design and print labels. 
+   Instead of images, you send text commands, and the printer renders: Text Barcodes QR / DataMatrix Lines & boxes Positions & fonts
+-> MergePdfs,ConvertPngToPdf - iTextsharp
+-> GhostScript - pdf to tiff
+-> SpreadsheetLight - sldocument to design excel
+-> AWS
+-> FirebaseAdmin
+-> Payment Gateway
+-> Azure - translator
+-> Google - lat,long-cityname api, distance calculate
+-> We implemented a Webhook-based WhatsApp Cloud API chatbot. 
+   The system works on an event-driven architecture where WhatsApp (Meta) sends incoming messages to our server through a webhook URL. 
+   Our backend processes the message, calls a stored procedure to determine the response, and then replies back to WhatsApp via the Meta Graph API. 
+   Step-by-Step Explanation (Non-technical) A customer sends a message or clicks a button in WhatsApp. 
+   Meta (Facebook) immediately calls our webhook URL with the message data. Our API receives this data and extracts: 
+     Sender mobile number   User message   Button payload (if any) We pass this information to a stored procedure in the database. 
+   The stored procedure returns a JSON reply based on business rules. Our backend sends this JSON as a reply to WhatsApp using the WhatsApp Cloud API. 
+   IMPORTANT KEYS & IDs - | Key Name | Description | | --------------- | --------------------------------- 
+   | | META_TOKEN | WhatsApp Cloud API access token | 
+   | PHONE_NUMBER_ID | WhatsApp Business phone number ID | 
+   | META_VERSION | Graph API version (e.g., v22.0) | 
+   | VERIFY_TOKEN | Webhook verification token | 
+   | WABA_ID | WhatsApp Business Account ID | Template = name Webhook Callback URL = Where Meta sends incoming messages Configured in:
+   Meta Developer Console → Webhooks Message Send URL (Meta Graph API) - Send message back to user https://graph.facebook.com/v22.0/{PHONE_NUMBER_ID}/messages
+   
+-> API Integration library for api integrations - restsharp to call api
+
+
+WinForms - Windows Application
+-> VMeasure - on awbno search it will call api where it will give reading of weight machine
+             after that store data and image in aws
+-> DataPushtoAWS = image from folder in aws
+-> scheduler = background proccess added in task scheduler - Send mail,whatsapp,sms,payment gateway status api,
+-> upload downlpad = fetch data from ftp and upload in ftp = filename,ftp path,user,password,method name(DownloadFile,UploadFile)
+-> upsawbxml - vendor pdf fetch and create zip give download option in their system and then send the mail to client.
+
+Webforms -
+-> website creation
+		

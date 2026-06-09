@@ -1,0 +1,155 @@
+Syntax - 
+---------------------------------------------------------------------------------------------
+Connection string query for framework and core -
+
+	- Web.config
+		<configuration>
+		  <connectionStrings>
+			<add name="DefaultConnection" connectionString="Data Source=SERVERNAME; Initial Catalog=DatabaseName;User ID=sa;Password=your_password;"
+			providerName="System.Data.SqlClient" />
+		  </connectionStrings>
+		</configuration>
+		
+	To Read - 
+		using System.Data;
+		using System.Data.SqlClient;
+		using System.Configuration;
+
+		string connStr =
+			ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+
+		DataSet ds = new DataSet();
+
+		using (SqlConnection con = new SqlConnection(connStr))
+		using (SqlCommand cmd = new SqlCommand("GetEmployeeData", con))
+		{
+			cmd.CommandType = CommandType.StoredProcedure;
+
+			// INPUT PARAMETER
+			cmd.Parameters.Add("@DeptName", SqlDbType.VarChar, 50).Value = "Accounts";
+
+			// DATA ADAPTER
+			using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+			{
+				da.Fill(ds);   // 🔥 This fills the DataSet
+			}
+		}
+	
+	- appsettings.json
+		{
+		  "ConnectionStrings": {
+			"DefaultConnection": "Server=SERVERNAME;
+								  Database=DatabaseName;
+								  User Id=sa;
+								  Password=your_password;
+								  TrustServerCertificate=True;"
+		  }
+		}
+		TrustServerCertificate=True is common in local/dev environments
+		
+		To Read - 
+		- EF Core 
+			builder.Services.AddDbContext<AppDbContext>(options =>
+			options.UseSqlServer(
+				builder.Configuration.GetConnectionString("DefaultConnection")));
+
+		- Using with ADO.NET in .NET Core
+			using Microsoft.Data.SqlClient;
+			SqlConnection con =
+				new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection"));
+---------------------------------------------------------------------------------------------
+ Ajax Query - 
+	- AJAX allows a web page to communicate with the server asynchronously and update parts of the UI without reloading the page.
+	
+	$.ajax({
+		url: '/Employee/GetEmployeesByDept',
+		type: 'GET',
+		data: { deptName: deptName }, // 🔹 query string
+		dataType: 'json',
+		success: function (data) {
+			
+		},
+		error: function (err) {
+			alert('Error occurred');
+		}
+	});
+	
+	POST - 
+		type: 'POST',
+		data: JSON.stringify({ deptName: deptName }),
+		contentType: 'application/json'
+
+	- contentType: 'application/json' - What you are sending TO the server
+	- dataType: 'json', - What you expect to receive FROM the server
+	
+---------------------------------------------------------------------------------------------
+PROCEDURE - 
+
+	CREATE PROCEDURE CountEmployee
+		@Name VARCHAR(100),
+		@Salary DECIMAL(10,2),
+		@DeptName VARCHAR(50),
+		@NewId INT OUTPUT
+	AS
+	BEGIN
+		select Name, Salary, DeptName from Employees
+
+		SET @NewId = SCOPE_IDENTITY()
+	END
+---------------------------------------------------------------------------------------------
+SQL Function -  						
+	CREATE FUNCTION dbo.fn_GetAnnualSalary
+	(
+		@MonthlySalary DECIMAL(10,2)
+	)
+	RETURNS DECIMAL(10,2)
+	AS
+	BEGIN
+		RETURN (@MonthlySalary * 12)
+	END
+---------------------------------------------------------------------------------------------
+Startup.cs vs Program.cs
+
+- Startup.cs
+		public class Startup
+		{
+			public void ConfigureServices(IServiceCollection services)
+			{
+				services.AddControllers();
+			}
+
+			public void Configure(IApplicationBuilder app)
+			{
+				app.UseRouting();
+				app.UseAuthorization();
+				app.UseEndpoints(endpoints =>
+				{
+					endpoints.MapControllers();
+				});
+			}
+		}
+	
+	- Program.cs 
+		var builder = WebApplication.CreateBuilder(args);
+
+		builder.Services.AddControllers();
+
+		var app = builder.Build();
+
+		app.UseRouting();
+		app.UseAuthorization();
+		app.MapControllers();
+
+		app.Run();
+
+
+
+
+
+
+
+
+
+
+
+
