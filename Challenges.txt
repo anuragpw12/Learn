@@ -1,0 +1,108 @@
+Challenges
+-------------------------------------------------------------------------------------------------------------------------------------
+Top 2 = 
+	1.
+	One challenge I faced was when our DHL LSPS integration suddenly stopped working because 
+	DHL changed their API logic without informing us. Shipment entries were getting paused. 
+	I coordinated with the DHL technical team, analyzed the API changes, updated our backend integration logic, 
+	and deployed the fix. This restored shipment processing the same day.
+	
+	2.
+	Another challenge was database storage growth. Vendor API images were stored as Base64 in the database, 
+	and with around 600,000 records per year the storage was increasing rapidly. I developed a tool that allowed 
+	the client to download images to their local machine and safely remove older 
+	records from the database while maintaining logs and email confirmation. This solved the storage issue.
+	
+	
+-------------------------------------------------------------------------------------------------------------------------------------
+1. DHL LSPS Integration Change
+
+DHL changed their API logic without notifying us, which caused shipment creation to stop.
+I coordinated with their team, analyzed the changes, updated our backend integration, and restored shipment processing.
+
+
+
+2. Vendor API Image Storage Issue
+
+Vendor API images were stored as Base64 in the database, causing storage to grow rapidly (~600k records yearly).
+I built a tool to download images to the client machine and safely remove old records, reducing database storage.
+
+
+
+3. Customer Shipment Payment Automation
+
+After payment gateway redirect, shipment data needed to be saved automatically.
+I used localStorage and setInterval to detect payment success and trigger shipment save reliably.
+
+
+
+4. Mobile Scanner API Trigger Issue
+
+Zebra barcode scanner was triggering multiple API calls due to keyup events.
+I implemented debounce (200ms) to ensure the API is called only once after scanning.
+
+
+
+5. Vendor Rate API Integration
+
+Earlier shipment rates were stored internally, but the client wanted real-time vendor rates.
+I integrated vendor APIs like FedEx to fetch live rate calculations and display them in the system.
+
+
+
+6. Sales Reporting
+
+Management required sales reports by country, branch, and region.
+I created optimized SQL queries and generated Excel reports directly from the UI.
+
+
+
+7. Mentoring Junior Developers
+
+During project revamping I guided junior developers to understand business logic and existing code.
+I helped them apply OOP concepts, interfaces, and dependency injection to write cleaner code.
+
+
+
+8. WhatsApp Shipment Tracking
+
+Client wanted customers to track shipments via WhatsApp.
+I implemented WhatsApp Cloud API webhook integration to receive messages and return shipment status.
+
+
+
+9. Azure Translator Integration
+
+Dubai client entered shipment data in Arabic while the system required English.
+I integrated Azure Translator API to automatically translate data before storing it.
+
+
+
+10. AWS S3 Storage
+
+Some clients required shipment KYC documents to be stored in AWS instead of local servers.
+I integrated AWS S3 for secure file storage and retrieval.
+
+
+
+11. API Integration Class Library
+
+Multiple vendor APIs required similar integration logic.
+I created a reusable class library to standardize API integrations and improve maintainability.
+
+
+
+12. Microservices Implementation
+
+Built a microservices architecture using .NET 8, Clean Architecture, API Gateway, Redis, RabbitMQ, JWT, and BCrypt.
+This improved system scalability and modular service development.
+
+
+
+13. Angular Balance Update
+
+Customer balance in the header needed to update immediately after shipment entry.
+I used RxJS Subject to broadcast balance updates between Angular components.
+
+
+

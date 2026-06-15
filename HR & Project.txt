@@ -1,0 +1,145 @@
+HR & Project
+----------------------------------------------------------------------------------------------------------------------------------------
+1.Tell me about yourself?
+
+Good morning, and thank you for the opportunity.
+
+My name is Anurag, and I have around 5 years of experience as a software developer. 
+Currently, I’m working with BusiSoft Infotech in the courier and logistics domain.
+
+I started my career working on .NET Framework applications, including ASP.NET WebForms, 
+MVC, and WinForms, along with SQL Server for database development. Over time, 
+I transitioned to ASP.NET Core, where I mainly focus on building Web APIs and backend services.
+
+On the frontend side, I initially worked with HTML, Razor views, and AngularJS, and currently 
+I build UI modules using Angular.
+
+In my current role, I mainly work on designing APIs and integrating third-party services, 
+such as courier APIs like FedEx and DHL, and payment gateways like Razorpay and EaseBuzz. 
+I’ve also worked with cloud services like AWS and Azure for file storage and application hosting.
+
+Recently, I implemented a WhatsApp chatbot for shipment tracking, and also worked on
+ performance improvements using Redis caching and RabbitMQ for background job processing.
+
+Along with development, I’m also involved in mentoring junior developers, conducting code 
+reviews, and participating in system design discussions.
+
+So currently I’m working across both backend and frontend, and 
+I’m interested in roles where I can continue contributing as a full-stack developer.
+So that’s a quick overview of my experience.
+----------------------------------------------------------------------------------------------------------------------------------------
+Walk me through your projects
+
+Currently, I’m working in the courier and logistics domain. The system manages shipment booking, 
+manifesting, invoicing, reporting, and multiple third-party integrations.
+
+At present, I work on two projects simultaneously. One is a legacy system used by multiple clients, 
+and the other is a revamped system that we are building using .NET Core. The work is usually planned 
+based on sprint priorities, where we pick tickets depending on business requirements.
+
+Legacy System
+The legacy system is built using ASP.NET MVC (.NET Framework) with Razor views and AngularJS for the 
+frontend, and SQL Server as the database.
+We also have a mobile application built using AngularJS, which is used as a WebView inside the mobile app.
+This system handles core courier operations like shipment booking, manifesting, invoicing, reporting, 
+and API integrations with external services.
+
+Revamped System
+Recently, we started revamping the platform by building new modules using ASP.NET Core microservices 
+with clean architecture.
+
+In this system we use:
+ASP.NET Core Web APIs
+SQL Server
+Dapper for data access
+Angular for the UI
+The goal of this new system is to make the platform more scalable, maintainable, and easier to extend.
+
+Other Technologies
+Apart from these, I have also worked on WinForms applications, class libraries, and WebForms modules as 
+part of supporting older systems.
+ 
+My responsibilities include:
+	Designing and developing APIs and application modules
+	Integrating third-party services such as courier APIs and payment gateways
+	Writing and optimizing SQL queries and stored procedures
+	Working on system improvements and issue resolution
+	Mentoring junior developers and participating in code reviews
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Why microservice?
+	We initially had a monolithic system, but since there were frequent client-specific changes, 
+	every modification required redeploying the entire application. To reduce deployment impact 
+	and improve maintainability, we separated some modules into independent services so they could 
+	be deployed and updated independently.
+
+DB?
+	Since the system originally started as a monolithic application and the team size is relatively small,
+	maintaining separate databases would add unnecessary operational complexity. Our goal was to modularize 
+	the application first while keeping database management simpler.
+	
+	Since our platform supports multiple clients, having a separate database for every service would create
+	significant operational overhead. So we separated services at the application level but kept a shared 
+	database with different tables for each module.
+	
+----------------------------------------------------------------------------------------------------------------------------------------
+2. Why Change?
+	I’ve been with my current organization for around five years and it’s been a great learning journey. 
+	I’ve worked across different parts of the system and gained strong hands-on experience. 
+	Now I feel it’s the right time to explore new opportunities where I can work on larger-scale systems and continue growing both 
+	technically and professionally.
+----------------------------------------------------------------------------------------------------------------------------------------
+Strength
+
+	I believe my strength has developed over time by working on different kinds of tasks. 
+	Through working on various modules, API integrations, and production issues, 
+	I have built confidence and strong problem-solving skills. 
+	Each challenge helped me improve my ability to analyze problems and deliver practical solutions.
+	
+----------------------------------------------------------------------------------------------------------------------------------------
+Weakeness
+
+	Earlier, I sometimes took multiple tasks at the same time, which could affect focus. 
+	To improve this, I started organizing and prioritizing my tasks 
+	properly by noting them down and handling them one by one.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Why do you think you are an ideal candidate	
+	I believe I’m a good fit for this role because I have around 5 years of experience building applications using 
+	.NET technologies. I have worked on developing Web APIs, integrating third-party services, and building 
+	frontend modules using Angular.
+	Along with development, I’m also involved in code reviews, mentoring junior developers, 
+	and solving production issues, which helps improve the overall quality of the system.
+	Because of this experience, I believe I can contribute effectively to the team.
+	
+----------------------------------------------------------------------------------------------------------------------------------------
+How do you prioritise tasks when working on multiple integration projects simultaneously?
+	When handling multiple integration tasks, I first understand the priority and business impact, usually
+	by discussing with the team or manager. Then I break the work into smaller tasks and focus on dependencies 
+	first, especially integrations that may block other modules. 
+	I also track tasks using notes or task boards and keep the team updated on progress.
+----------------------------------------------------------------------------------------------------------------------------------------	
+Describe a situation where you had to coordinate with cross-functional teams 
+	In one case, our support team reported that shipment tracking updates were not working correctly. 
+	I coordinated with the support team to gather details and with QA to reproduce the issue. 
+	After analyzing the logs, I found that the issue was related to the courier API response handling. 
+	I fixed the integration logic and added better error handling. 
+	After QA verification, the issue was resolved in production.
+	
+----------------------------------------------------------------------------------------------------------------------------------------
+How can we trust that you will not again go for cross offer letter?
+
+	I understand your concern. Recently I did get some opportunities, but I didn’t move forward because 
+	they were not aligned with my career goals. I prefer to make thoughtful decisions rather than switching quickly. 
+	If the role aligns with my skills and long-term growth, I prefer to stay committed.
+	
+----------------------------------------------------------------------------------------------------------------------------------------
+Any Questions?
+
+-> With my existing skills what more can I bring to the table?
+-> Are there opportunities for skill enhancement, certifications, or training to grow within this role?
+-> What would be the main responsibilities or priorities for this role in the first few months?
+
+

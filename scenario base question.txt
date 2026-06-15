@@ -1,0 +1,107 @@
+scenario base question
+----------------------------------------------------------------------------------------------------------------------------------------
+3.What is new in Dotnet?
+1. Unified & Cross-Platform
+	.NET is now a single unified platform for Web, APIs, Desktop, Mobile and Cloud.
+	Same runtime and libraries across Windows, Linux, and macOS.
+
+2. Performance Improvements
+	Every release focuses on runtime performance.
+	Faster startup, lower memory usage, better garbage collection and async performance.
+
+3. Minimal APIs
+	Introduced Minimal APIs for building lightweight services.
+	Less boilerplate compared to traditional controllers.
+	Very useful for microservices and serverless APIs.
+
+4. Native AOT (Ahead-of-Time Compilation)
+	Supports compiling apps into native binaries.
+	Results in very fast startup and smaller memory footprint.
+	Ideal for containers and cloud workloads.
+
+5. Cloud & Microservices First
+	Built-in support for Docker and Kubernetes.
+	Better logging, health checks, and observability.
+	Designed to be cloud-native and scalable.
+
+6. Continuous C# Language Enhancements
+	Modern C# features like records, pattern matching, init properties, required members.
+	Improves code readability, safety, and productivity.
+
+7. MAUI (for Mobile & Desktop)
+	.NET now includes MAUI (Multi-platform App UI).
+	Used to build Android, iOS, Windows, and macOS apps from a single C# codebase.
+ 
+ 
+ 	 
+----------------------------------------------------------------------------------------------------------------------------------------
+Describe a production issue you resolved.
+	In one production issue, our DHL API integration suddenly stopped creating shipments. 
+	After checking logs and API responses, I found DHL had changed their API logic without notifying us. 
+	I coordinated with their team, updated our backend integration, and restored shipment processing.
+
+	In production we had implemented a FedEx vendor rate API where rates were calculated using pincode and destination with discounts from our internal table. 
+	Later the client required zone-wise calculation as well. Since the FedEx API returned zone data, I mapped it with our internal zone table and updated the 
+	rate calculation logic to generate accurate pricing.
+	
+----------------------------------------------------------------------------------------------------------------------------------------
+Have you handled client interactions?
+	Yes, I have interacted with clients and external vendors for requirement clarification and integration issues. 
+	For example, when DHL changed their API logic without notice, I coordinated with their technical team, analyzed the changes, 
+	and updated our backend integration to restore shipment processing.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+How do you manage deadlines?
+	1 Break task into smaller parts and estimate
+	2 Prioritize important work
+	3 Communicate with team
+	4 Track progress (Agile / stand-ups)
+	5 Give a small real example
+		For example, in one of our courier projects, we had to integrate multiple payment gateways and courier APIs 
+		within a tight timeline. I divided the work into API integration, testing, and error handling phases,
+		and coordinated with the QA team early.
+		This helped us deliver the feature within the sprint deadline without affecting quality.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+How do you handle changing requirements?
+
+	Changing requirements are common in software development. I first try to clearly understand the new requirement 
+	and analyze its impact on the existing system. Then I discuss the effort and timeline with the team and plan the 
+	changes accordingly. For example, in our courier project we initially calculated shipping rates using pincode, but 
+	later we had to support zone-based pricing from the FedEx API. I updated the mapping logic and calculation flow 
+	without affecting existing functionality.
+	Clear communication and proper impact analysis help me manage such changes efficiently.
+	
+----------------------------------------------------------------------------------------------------------------------------------------
+Multiple users updating same data (Concurrency)
+
+	- In EF Core, concurrency is handled using optimistic concurrency.
+	If we don’t use RowVersion or Timestamp, EF cannot detect concurrent updates and the last user overwrites data.
+	By adding a RowVersion column, EF includes it in the WHERE clause during update.
+	- If another user has already modified the record, EF throws DbUpdateConcurrencyException.
+	When DbUpdateConcurrencyException occurs, we handle it based on business needs.
+	Usually we inform the user and reload latest data.
+	In some cases, we retry or merge changes instead of overwriting.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+2. High-traffic API performance issue (Your ASP.NET Core API is slow when 10,000+ users hit it at the same time. 
+    How would you improve performance?)
+	
+	With Dapper, I improve performance by using async database calls, writing optimized SQL with proper indexes, 
+	avoiding SELECT *, enabling caching, and relying on connection pooling. 
+	Since Dapper is lightweight, most performance tuning is done at SQL and API level.
+----------------------------------------------------------------------------------------------------------------------------------------
+Memory leak in long-running application (Your .NET application’s memory usage keeps increasing. How do you find and fix it?)
+
+	Dispose unmanaged resources (IDisposable)
+	Not disposing streams, DB connections, HttpClient handlers
+	Use using blocks
+	Avoid static references public static List<Employee> Employees = new(); Remove static
+	
+----------------------------------------------------------------------------------------------------------------------------------------
+If API is slow and database is large, what will you check?
+	Expected points:
+	Proper indexing
+	Execution plan analysis
+	Query optimization
+	N+1 query issue (if using Entity Framework)
