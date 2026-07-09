@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>.NET Full Stack Interview — Answers with Examples</title>
+<style>
+:root { --bg:#0f1420; --card:#161d2e; --ink:#e8ecf4; --muted:#9aa7bd;
+  --accent:#4da3ff; --say:#ffd166; --code-bg:#0b1020; --line:#26324a; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+header { padding:28px 20px; background:linear-gradient(135deg,#12203a);
+  background:linear-gradient(135deg,#173a6d,#0f1420); border-bottom:1px solid var(--line); }
+h1 { margin:0 0 6px; font-size:22px; }
+.sub { color:var(--muted); font-size:14px; }
+nav { padding:14px 20px; background:var(--card); border-bottom:1px solid var(--line);
+  position:sticky; top:0; z-index:10; }
+nav a { color:var(--accent); text-decoration:none; font-size:13px; margin-right:14px;
+  white-space:nowrap; display:inline-block; padding:3px 0; }
+main { padding:8px 16px 60px; max-width:900px; margin:0 auto; }
+h2 { font-size:19px; margin:34px 0 4px; padding-top:10px; border-top:2px solid var(--accent);
+  scroll-margin-top:60px; }
+.count { color:var(--muted); font-size:12px; font-weight:normal; }
+.qa { background:var(--card); border:1px solid var(--line); border-radius:12px;
+  padding:14px 16px; margin:14px 0; }
+.q { font-weight:700; font-size:16px; color:#fff; }
+.q .num { color:var(--accent); margin-right:8px; }
+.say { margin:10px 0; padding:10px 12px; border-left:3px solid var(--say);
+  background:rgba(255,209,102,.07); border-radius:0 8px 8px 0; font-size:14.5px; }
+.say b { color:var(--say); text-transform:uppercase; font-size:11px; letter-spacing:.5px;
+  display:block; margin-bottom:3px; }
+pre { background:var(--code-bg); border:1px solid var(--line); border-radius:8px;
+  padding:12px 14px; overflow-x:auto; font:13px/1.5 "SF Mono",Consolas,Menlo,monospace;
+  color:#d6e2ff; margin:10px 0 0; }
+.top { display:block; text-align:right; font-size:12px; color:var(--muted);
+  text-decoration:none; margin-top:6px; }
+code { font-family:"SF Mono",Consolas,Menlo,monospace; }
+</style></head><body>
+<header>
+  <h1>.NET Full Stack Interview — Answers with Examples</h1>
+  <div class="sub">144 questions across 10 sections · each with how-to-say-it + code · Angular track (no React)</div>
+</header>
+<nav>
+<a href="#s0">ASP.NET Core</a>
+<a href="#s1">Angular</a>
+<a href="#s2">SQL Server</a>
+<a href="#s3">Azure &amp; DevOps</a>
+<a href="#s4">Microservices &amp; System Design</a>
+<a href="#s5">Scenario / Production</a>
+<a href="#s6">Design Patterns &amp; OOP</a>
+<a href="#s7">Security</a>
+<a href="#s8">Coding &amp; DSA</a>
+<a href="#s9">Other Concepts</a>
+</nav><main>
+<h2 id="s0">ASP.NET Core <span class="count">(30)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q1</span>Explain the ASP.NET Core request pipeline</div>
+<div class="say"><b>How to answer</b>Frame it as a journey: &#x27;A request enters Kestrel, flows through the middleware pipeline in the exact order I register it, hits the matched endpoint, and the response flows back out through the same middleware in reverse.&#x27; Then name the order, because order is what they&#x27;re testing.</div>
+<pre>var app = builder.Build();
+app.UseExceptionHandler(&quot;/error&quot;);   // outermost — catches everything below
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();                    // selects the endpoint
+app.UseAuthentication();             // who are you
+app.UseAuthorization();              // what can you do
+app.MapControllers();                // endpoint executes
+app.Run();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q2</span>Middleware vs Filters / Action Filters</div>
+<div class="say"><b>How to answer</b>Draw the boundary clearly: &#x27;Middleware runs for every request at the HTTP level — before MVC even exists. Filters run inside MVC and can see the action, its arguments and the result.&#x27; Then give the use-case split.</div>
+<pre>// Middleware — runs for ALL requests, even static files
+app.Use(async (ctx, next) =&gt; { _log.LogInformation(ctx.Request.Path); await next(); });
+
+// Action filter — only for controller actions, sees model + args
+public class AuditFilter : IActionFilter {
+    public void OnActionExecuting(ActionExecutingContext ctx)
+        =&gt; _audit.Log(ctx.ActionArguments);   // has MVC context
+    public void OnActionExecuted(ActionExecutedContext ctx) { }
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q3</span>Dependency Injection &amp; service lifetimes</div>
+<div class="say"><b>How to answer</b>Define the three in one breath, then immediately give the classic bug — interviewers want to know you understand the *consequence* of getting it wrong, not just the definitions.</div>
+<pre>builder.Services.AddSingleton&lt;ICache, Cache&gt;();      // one for the whole app
+builder.Services.AddScoped&lt;AppDbContext&gt;();          // one per HTTP request
+builder.Services.AddTransient&lt;IEmailBuilder, EmailBuilder&gt;(); // new every time
+
+// The classic bug — captive dependency:
+// Injecting a Scoped DbContext into a Singleton keeps ONE DbContext alive
+// forever, shared across all requests → threading errors + stale data.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q4</span>Why is AddScoped() commonly used?</div>
+<div class="say"><b>How to answer</b>One line: &#x27;Because request-bound services need to be shared within a request but isolated between concurrent requests — and that&#x27;s exactly what Scoped gives you.&#x27; Name the usual suspects.</div>
+<pre>// DbContext, repositories, unit-of-work, current-user context:
+builder.Services.AddScoped&lt;IOrderRepository, OrderRepository&gt;();
+// shared across everything in ONE request; a fresh one for the next request.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q5</span>How does async/await improve scalability?</div>
+<div class="say"><b>How to answer</b>Correct the common misconception up front: &#x27;It doesn&#x27;t make a single request faster — it improves throughput. During an I/O wait the thread goes back to the pool instead of blocking, so the same threads serve many more concurrent requests.&#x27; Then show the anti-pattern.</div>
+<pre>// BAD — thread blocked for the whole 2s wait, serving nobody
+var data = httpClient.GetStringAsync(url).Result;   // also risks deadlock
+
+// GOOD — thread released during the wait, picks up other work
+var data = await httpClient.GetStringAsync(url, cancellationToken);</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q6</span>JWT authentication flow / JWT vs OAuth2</div>
+<div class="say"><b>How to answer</b>Walk the flow in one sentence, then make the distinction they&#x27;re fishing for: &#x27;JWT is a token *format*; OAuth2 is the authorization *framework* that hands them out.&#x27;</div>
+<pre>builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(o =&gt; o.TokenValidationParameters = new() {
+        ValidateIssuer = true,   ValidIssuer   = &quot;myapp&quot;,
+        ValidateAudience = true, ValidAudience = &quot;myapi&quot;,
+        ValidateLifetime = true,
+        IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+    });
+// Client sends: Authorization: Bearer eyJhbGci...  on every request. Stateless.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q7</span>IActionResult vs ActionResult&lt;T&gt;</div>
+<div class="say"><b>How to answer</b>&#x27;Both let me return NotFound() or Ok(), but ActionResult&lt;T&gt; also lets me return the object directly and — crucially — tells Swagger the response type.&#x27;</div>
+<pre>public ActionResult&lt;Order&gt; Get(int id) {
+    var order = _repo.Find(id);
+    if (order is null) return NotFound();  // an action result
+    return order;                          // T directly — implicit conversion
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q8</span>Global / centralized exception handling</div>
+<div class="say"><b>How to answer</b>&#x27;I put one handler at the very top of the pipeline, log with a correlation ID, and return RFC 7807 ProblemDetails — never a raw stack trace in production.&#x27; Mention IExceptionHandler is the .NET 8 way.</div>
+<pre>public class GlobalExceptionHandler : IExceptionHandler {
+    public async ValueTask&lt;bool&gt; TryHandleAsync(HttpContext ctx, Exception ex, CancellationToken ct) {
+        _log.LogError(ex, &quot;Unhandled&quot;);
+        ctx.Response.StatusCode = ex switch {
+            NotFoundException =&gt; 404, ValidationException =&gt; 400, _ =&gt; 500 };
+        await ctx.Response.WriteAsJsonAsync(new ProblemDetails {
+            Title = &quot;Error&quot;, Status = ctx.Response.StatusCode }, ct);
+        return true;
+    }
+}
+builder.Services.AddExceptionHandler&lt;GlobalExceptionHandler&gt;();
+app.UseExceptionHandler();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q9</span>Rate limiting in APIs</div>
+<div class="say"><b>How to answer</b>&#x27;.NET 7+ ships a built-in rate limiter — fixed window, sliding window, token bucket, concurrency — keyed per user or IP, returning 429. At real scale I&#x27;d also enforce it at the gateway.&#x27;</div>
+<pre>builder.Services.AddRateLimiter(o =&gt;
+    o.AddFixedWindowLimiter(&quot;api&quot;, opt =&gt; {
+        opt.PermitLimit = 100;
+        opt.Window = TimeSpan.FromMinutes(1);
+    }));
+app.UseRateLimiter();
+app.MapControllers().RequireRateLimiting(&quot;api&quot;);</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q10</span>How would you secure a public-facing / REST Web API?</div>
+<div class="say"><b>How to answer</b>Rattle off the layered checklist, then pick ONE to go deep on — object-level authorization (OWASP API #1) is the best choice because most people forget it.</div>
+<pre>// HTTPS, JWT, policy auth, validation, rate limiting, strict CORS,
+// security headers, Key Vault secrets, audit logging, OWASP API Top 10.
+
+// The one people forget — check the caller actually owns the resource (BOLA):
+if (order.CustomerId != User.GetCustomerId())
+    return Forbid();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q11</span>API versioning strategies</div>
+<div class="say"><b>How to answer</b>&#x27;I prefer URL versioning — most explicit, cache-friendly, easy to route. Query-string and header versioning are the alternatives.&#x27;</div>
+<pre>[ApiVersion(&quot;1.0&quot;)]
+[Route(&quot;api/v{version:apiVersion}/orders&quot;)]   // → /api/v1/orders
+public class OrdersController : ControllerBase { }
+// Asp.Versioning.* packages; deprecate old versions with a sunset header.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q12</span>How would you implement idempotent APIs?</div>
+<div class="say"><b>How to answer</b>&#x27;The client sends a unique Idempotency-Key; I store the key with its result and replay that result on retries instead of re-executing. A unique constraint on the business key is the safety net.&#x27;</div>
+<pre>[HttpPost(&quot;payments&quot;)]
+public async Task&lt;IActionResult&gt; Pay(
+    [FromHeader(Name=&quot;Idempotency-Key&quot;)] string key, PaymentDto dto) {
+    if (await _store.GetAsync(key) is {} prior) return Ok(prior); // replay
+    var result = await _payments.ProcessAsync(dto);
+    await _store.SaveAsync(key, result);
+    return Ok(result);
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q13</span>PUT vs PATCH - when to use?</div>
+<div class="say"><b>How to answer</b>&#x27;PUT replaces the whole resource and is idempotent; PATCH is a partial update. Send the full object to PUT, only the changed fields to PATCH.&#x27;</div>
+<pre>PUT   /orders/5   { full order object }              // replaces, idempotent
+PATCH /orders/5   [{ &quot;op&quot;:&quot;replace&quot;,
+                     &quot;path&quot;:&quot;/status&quot;,
+                     &quot;value&quot;:&quot;Shipped&quot; }]             // JSON Patch, partial</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q14</span>Repository pattern - why and how?</div>
+<div class="say"><b>How to answer</b>Give the honest version — it scores points: &#x27;It abstracts data access for testability and a single query home. With EF Core it&#x27;s debated since DbContext is already repo + unit-of-work, so I justify it by keeping EF out of my domain layer, not by habit.&#x27;</div>
+<pre>public interface IOrderRepository {
+    Task&lt;Order?&gt; GetAsync(int id);
+    Task AddAsync(Order order);
+}
+// Implementation lives in Infrastructure using EF Core;
+// Domain and Application layers never reference EF at all.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q15</span>How does model binding work?</div>
+<div class="say"><b>How to answer</b>&#x27;It maps request data — route, query, body, headers — onto my action parameters, then validation runs into ModelState. With [ApiController] a failed ModelState auto-returns 400.&#x27;</div>
+<pre>[HttpPut(&quot;orders/{id}&quot;)]
+public IActionResult Update(
+    int id,                        // from route
+    [FromQuery] bool notify,       // from query string
+    [FromBody] OrderDto dto)       // from JSON body
+{ ... }</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q16</span>How to handle CORS in ASP.NET Core?</div>
+<div class="say"><b>How to answer</b>&#x27;CORS is a browser rule — the server declares which origins may call it cross-origin. I register a named policy and place UseCors between routing and authorization. Never AllowAnyOrigin with AllowCredentials.&#x27;</div>
+<pre>builder.Services.AddCors(o =&gt; o.AddPolicy(&quot;spa&quot;, p =&gt;
+    p.WithOrigins(&quot;https://app.example.com&quot;).AllowAnyHeader().AllowAnyMethod()));
+app.UseRouting();
+app.UseCors(&quot;spa&quot;);
+app.UseAuthorization();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q17</span>Throw vs throw ex - difference?</div>
+<div class="say"><b>How to answer</b>Short and definitive: &#x27;Plain throw preserves the original stack trace; throw ex resets it to the current line and you lose where the error actually happened. Always use plain throw.&#x27;</div>
+<pre>catch (Exception ex) {
+    _log.LogError(ex, &quot;failed&quot;);
+    throw;       // preserves original stack trace
+    // throw ex; //  resets it — never do this
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q18</span>Attribute routing vs conventional routing</div>
+<div class="say"><b>How to answer</b>&#x27;Attribute routing decorates each action — explicit, preferred for REST APIs. Conventional routing defines one central URL pattern — typical for MVC apps with views.&#x27;</div>
+<pre>// Attribute
+[HttpGet(&quot;api/orders/{id:int}&quot;)]
+public IActionResult Get(int id) { ... }
+
+// Conventional
+app.MapControllerRoute(&quot;default&quot;, &quot;{controller=Home}/{action=Index}/{id?}&quot;);</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q19</span>Role of Program.cs in modern ASP.NET Core</div>
+<div class="say"><b>How to answer</b>&#x27;It&#x27;s the single startup file — top-level statements that build the host, register services in DI, wire the middleware pipeline, then run. It merged the old Program.cs and Startup.cs.&#x27;</div>
+<pre>var builder = WebApplication.CreateBuilder(args); // config, logging, DI
+builder.Services.AddControllers();                 // register services
+var app = builder.Build();
+app.UseHttpsRedirection();                         // pipeline
+app.MapControllers();
+app.Run();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q20</span>IConfiguration vs IOptions&lt;T&gt;</div>
+<div class="say"><b>How to answer</b>&#x27;IConfiguration is raw key lookups. IOptions binds a config section to a typed class with validation. IOptionsSnapshot reloads per request; IOptionsMonitor notifies singletons of changes.&#x27;</div>
+<pre>builder.Services.Configure&lt;ShippingOptions&gt;(config.GetSection(&quot;Shipping&quot;));
+
+public class ShippingService(IOptions&lt;ShippingOptions&gt; opts) {
+    public void Run() { var t = opts.Value.TimeoutSeconds; } // typed, not &quot;magic:key&quot;
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q21</span>How does appsettings.json work / override per environment?</div>
+<div class="say"><b>How to answer</b>&#x27;Configuration providers layer in order and later ones override earlier keys. Environment picks the file via ASPNETCORE_ENVIRONMENT; env vars use double-underscore for nesting.&#x27;</div>
+<pre>// Load order (each overrides the previous):
+// appsettings.json → appsettings.{Environment}.json → user secrets (dev)
+//   → environment variables → command-line args
+
+// Override a nested key from an env var:
+//   Shipping__TimeoutSeconds=30</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q22</span>Purpose of Minimal APIs - when to use them?</div>
+<div class="say"><b>How to answer</b>&#x27;Lightweight endpoints without controllers — less ceremony, faster startup, great for microservices. Controllers still win for large apps needing filters and conventions, though minimal APIs now support both.&#x27;</div>
+<pre>app.MapGet(&quot;/orders/{id}&quot;, async (int id, IOrderRepo repo) =&gt;
+    await repo.GetAsync(id) is Order o ? Results.Ok(o) : Results.NotFound());</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q23</span>What is Kestrel and how does it work with reverse proxies?</div>
+<div class="say"><b>How to answer</b>&#x27;Kestrel is the built-in cross-platform web server. In production I front it with Nginx/IIS/YARP for TLS termination, load balancing and header sanitization, and use ForwardedHeaders so the app sees the real client IP.&#x27;</div>
+<pre>app.UseForwardedHeaders(new ForwardedHeadersOptions {
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                     | ForwardedHeaders.XForwardedProto
+});</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q24</span>Explain endpoint routing in ASP.NET Core</div>
+<div class="say"><b>How to answer</b>&#x27;UseRouting matches the request to an endpoint and attaches its metadata to the context; middleware after it — auth, CORS — reads that metadata to decide; then the endpoint runs. That&#x27;s why the order UseRouting → auth → endpoints matters.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q25</span>Differences between MVC Controllers, Minimal APIs, and gRPC endpoints</div>
+<div class="say"><b>How to answer</b>Compare on style and best-fit rather than listing features: &#x27;Controllers for large REST APIs, Minimal APIs for small services, gRPC for high-performance internal service-to-service with contracts and streaming.&#x27;</div>
+<pre>// Controller : full MVC features        → large REST APIs
+// Minimal API : lambda endpoints          → microservices, low overhead
+// gRPC        : .proto contract, HTTP/2,   → internal svc-to-svc, streaming
+//               binary protobuf</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q26</span>Advantages and limitations of Entity Framework Core</div>
+<div class="say"><b>How to answer</b>&#x27;Great productivity — LINQ, change tracking, migrations. The cost is control on complex queries. I mitigate with AsNoTracking, projections and split queries on hot paths.&#x27;</div>
+<pre>var list = await db.Orders.AsNoTracking()
+    .Where(o =&gt; o.Status == &quot;Open&quot;)
+    .Select(o =&gt; new OrderSummary(o.Id, o.Total)) // SELECT only 2 columns
+    .ToListAsync();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q27</span>When would you choose Dapper instead of EF Core?</div>
+<div class="say"><b>How to answer</b>&#x27;When I need full SQL control and maximum read speed — reporting, heavy joins, stored procedures. A common split is EF for writes, Dapper for hot reads.&#x27;</div>
+<pre>var rows = await conn.QueryAsync&lt;OrderSummary&gt;(
+    &quot;SELECT Id, Total FROM Orders WHERE Status = @s&quot;, new { s = &quot;Open&quot; });</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q28</span>What is IHostedService / BackgroundService?</div>
+<div class="say"><b>How to answer</b>&#x27;For long-lived background work inside the host — queue consumers, scheduled jobs, cache warmup. BackgroundService gives me an ExecuteAsync loop with a stopping token. For real scheduling I&#x27;d reach for Hangfire or Quartz.&#x27;</div>
+<pre>public class QueueWorker : BackgroundService {
+    protected override async Task ExecuteAsync(CancellationToken ct) {
+        while (!ct.IsCancellationRequested) {
+            var msg = await _queue.DequeueAsync(ct);
+            await ProcessAsync(msg);
+        }
+    }
+}
+builder.Services.AddHostedService&lt;QueueWorker&gt;();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q29</span>Generic Host vs Web Host - why was Generic Host introduced?</div>
+<div class="say"><b>How to answer</b>&#x27;Web Host was HTTP-only. The Generic Host generalized DI, config, logging and lifetime for any workload — web apps, worker services, console apps — so since 3.0 web apps run on it with a web workload plugged in.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q30</span>How would you design health checks, readiness &amp; liveness probes?</div>
+<div class="say"><b>How to answer</b>&#x27;Liveness answers is the process alive — fail it and the orchestrator restarts me, so keep it cheap and dependency-free. Readiness answers are my dependencies up — fail it and I&#x27;m pulled from the load balancer. I tag dependency checks as ready-only.&#x27;</div>
+<pre>builder.Services.AddHealthChecks()
+    .AddSqlServer(conn, tags: new[] { &quot;ready&quot; })
+    .AddRedis(redis, tags: new[] { &quot;ready&quot; });
+
+app.MapHealthChecks(&quot;/health/live&quot;);   // liveness: cheap, no deps
+app.MapHealthChecks(&quot;/health/ready&quot;,
+    new() { Predicate = c =&gt; c.Tags.Contains(&quot;ready&quot;) });</pre>
+</div>
+<a class="top" href="#top">↑ top</a>
+<h2 id="s1">Angular <span class="count">(13)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q31</span>Angular lifecycle hooks</div>
+<div class="say"><b>How to answer</b>Recite the order — that&#x27;s the test — then anchor two with a rule: init logic in ngOnInit, DOM access in ngAfterViewInit, cleanup in ngOnDestroy.</div>
+<pre>ngOnChanges  → ngOnInit → ngDoCheck
+  → ngAfterContentInit/Checked → ngAfterViewInit/Checked → ngOnDestroy
+
+ngOnInit()      { this.loadData(); }          // init, not the constructor
+ngAfterViewInit(){ this.chart.render(); }      // DOM is ready here
+ngOnDestroy()   { this.sub.unsubscribe(); }    // prevent memory leaks</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q32</span>Change detection strategy / how it works</div>
+<div class="say"><b>How to answer</b>&#x27;Zone.js patches async APIs and triggers change detection from the root. Default checks the whole tree; OnPush only checks a component when an @Input reference changes, an event fires inside it, or an async pipe emits. Signals go further with fine-grained updates.&#x27;</div>
+<pre>@Component({ changeDetection: ChangeDetectionStrategy.OnPush })
+export class OrderCard {
+  @Input() order!: Order;   // must pass a NEW reference to re-render
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q33</span>Observables vs Promises</div>
+<div class="say"><b>How to answer</b>&#x27;Observables are lazy, cancellable and emit many values over time with operators; Promises are eager, single-value, not cancellable. That&#x27;s exactly why HttpClient returns Observables — I can cancel or switch requests.&#x27;</div>
+<pre>this.search.valueChanges.pipe(
+  debounceTime(300),
+  switchMap(term =&gt; this.api.search(term))  // cancels the previous request
+).subscribe(results =&gt; this.results = results);</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q34</span>Reactive Forms vs Template Driven Forms</div>
+<div class="say"><b>How to answer</b>&#x27;Reactive: the model lives in TypeScript — synchronous, testable, dynamic controls, custom validators — best for complex forms. Template-driven: ngModel in HTML, less code, fine for simple ones.&#x27;</div>
+<pre>form = this.fb.group({
+  email: [&#x27;&#x27;, [Validators.required, Validators.email]],
+  items: this.fb.array([])          // dynamic rows
+});
+addItem() { this.items.push(this.fb.control(&#x27;&#x27;)); }</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q35</span>Route guards - types and use cases</div>
+<div class="say"><b>How to answer</b>&#x27;CanActivate for auth, CanDeactivate to warn on unsaved changes, CanMatch/CanLoad to block lazy bundles, Resolve to prefetch. Since v15 they&#x27;re just functions using inject().&#x27;</div>
+<pre>export const authGuard: CanActivateFn = () =&gt; {
+  const auth = inject(AuthService);
+  return auth.isLoggedIn() || inject(Router).createUrlTree([&#x27;/login&#x27;]);
+};</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q36</span>Lazy loading - what is it and how does it help?</div>
+<div class="say"><b>How to answer</b>&#x27;Feature routes load their bundle on demand instead of shipping everything upfront — smaller initial bundle, faster first paint. I pair it with a preloading strategy for likely-next routes.&#x27;</div>
+<pre>{ path: &#x27;orders&#x27;,
+  loadComponent: () =&gt; import(&#x27;./orders/orders.component&#x27;)
+                        .then(m =&gt; m.OrdersComponent) }</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q37</span>State management (NgRx / Redux / Signals) - when required?</div>
+<div class="say"><b>How to answer</b>&#x27;When unrelated components share state, state survives navigation, or I need devtools and auditability. For small-to-medium apps a service with signals is enough — I don&#x27;t add NgRx by default.&#x27;</div>
+<pre>// Simple shared state without NgRx:
+@Injectable({ providedIn: &#x27;root&#x27; })
+export class CartStore {
+  private _items = signal&lt;Item[]&gt;([]);
+  items = this._items.asReadonly();
+  add(i: Item) { this._items.update(x =&gt; [...x, i]); }
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q38</span>NgRx vs Signals</div>
+<div class="say"><b>How to answer</b>&#x27;NgRx is the full Redux pattern — predictable and tooled but boilerplate-heavy, for large apps. Signals are built-in fine-grained reactivity — simple and fast. NgRx SignalStore blends both.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q39</span>@Input vs @Output</div>
+<div class="say"><b>How to answer</b>&#x27;@Input passes data down to a child; @Output emits events up to the parent. Together they&#x27;re the component&#x27;s public API.&#x27;</div>
+<pre>@Input()  order!: Order;                       // parent → child
+@Output() approved = new EventEmitter&lt;number&gt;(); // child → parent
+approve() { this.approved.emit(this.order.id); }</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q40</span>Component vs Directive - difference</div>
+<div class="say"><b>How to answer</b>&#x27;A component is a directive WITH a template — it owns a view. Attribute directives change behaviour of an existing element; structural directives change DOM layout like *ngIf and *ngFor.&#x27;</div>
+<pre>@Directive({ selector: &#x27;[appHighlight]&#x27; })
+export class HighlightDirective {
+  @HostListener(&#x27;mouseenter&#x27;) on() { this.el.nativeElement.style.background = &#x27;yellow&#x27;; }
+  constructor(private el: ElementRef) {}
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q41</span>Global / API error handling in Angular</div>
+<div class="say"><b>How to answer</b>&#x27;A custom ErrorHandler catches uncaught runtime errors; an HttpInterceptor centralizes API errors — retry transient ones, redirect on 401, surface friendly messages.&#x27;</div>
+<pre>export const errorInterceptor: HttpInterceptorFn = (req, next) =&gt;
+  next(req).pipe(catchError((err: HttpErrorResponse) =&gt; {
+    if (err.status === 401) inject(Router).navigate([&#x27;/login&#x27;]);
+    return throwError(() =&gt; err);
+  }));</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q42</span>How to optimize frontend performance / bundle size?</div>
+<div class="say"><b>How to answer</b>Rattle off the toolkit, then anchor one: &#x27;trackBy stops Angular re-rendering an entire list when one item changes.&#x27;</div>
+<pre>// Lazy routes, OnPush/signals, pure pipes, defer blocks, NgOptimizedImage,
+// bundle analysis. The one-liner that bites people:
+&lt;div *ngFor=&quot;let o of orders; trackBy: trackById&quot;&gt;   // stable identity
+trackById = (_: number, o: Order) =&gt; o.id;</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q43</span>How would you debug performance issues in Angular?</div>
+<div class="say"><b>How to answer</b>&#x27;Angular DevTools profiler shows which components re-render and how long change detection takes. I look for function calls in templates, missing trackBy, and Default-strategy components re-rendering needlessly, then confirm with the Chrome Performance tab.&#x27;</div>
+</div>
+<a class="top" href="#top">↑ top</a>
+<h2 id="s2">SQL Server <span class="count">(13)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q44</span>Query to find the 2nd highest salary</div>
+<div class="say"><b>How to answer</b>Give the DENSE_RANK version as your primary answer and say why: &#x27;I use DENSE_RANK because it handles ties correctly, unlike a simple MAX-less-than.&#x27; Then mention the OFFSET alternative.</div>
+<pre>-- Handles ties:
+SELECT Salary FROM (
+  SELECT Salary, DENSE_RANK() OVER (ORDER BY Salary DESC) AS rnk
+  FROM Employees
+) t WHERE rnk = 2;
+
+-- Simple alternative:
+SELECT DISTINCT Salary FROM Employees
+ORDER BY Salary DESC OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY;</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q45</span>Clustered vs Non-Clustered index</div>
+<div class="say"><b>How to answer</b>&#x27;The clustered index IS the table — it defines physical row order, so one per table. Non-clustered is a separate structure pointing back to rows; I can INCLUDE columns to cover a query and avoid key lookups.&#x27;</div>
+<pre>CREATE CLUSTERED INDEX IX_Orders_Id ON Orders(Id);          -- physical order
+CREATE NONCLUSTERED INDEX IX_Orders_Cust ON Orders(CustomerId)
+    INCLUDE (Total, Status);   -- covering index — no key lookup needed</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q46</span>CTE vs Temp Table</div>
+<div class="say"><b>How to answer</b>&#x27;A CTE is inline, single-statement, not materialized — great for readability and recursion. A temp table is materialized in tempdb with stats and indexes — better when I reuse a large intermediate result across statements.&#x27;</div>
+<pre>WITH Ranked AS (
+  SELECT *, ROW_NUMBER() OVER (PARTITION BY CustomerId ORDER BY Date DESC) rn
+  FROM Orders
+)
+SELECT * FROM Ranked WHERE rn = 1;   -- latest order per customer</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q47</span>Temp Table vs Table Variable</div>
+<div class="say"><b>How to answer</b>&#x27;Temp tables have statistics and support indexes, so the optimizer plans them well for large sets. Table variables have no stats — historically estimated as one row — so I keep them for small counts.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q48</span>What causes deadlocks? / blocking</div>
+<div class="say"><b>How to answer</b>&#x27;Blocking is one session waiting on another&#x27;s lock. A deadlock is a cycle — each holds what the other needs — and SQL Server kills one as the victim, error 1205. Usual causes: inconsistent object access order and long transactions. Fixes: consistent order, short transactions, right indexes, RCSI, and retry logic.&#x27;</div>
+<pre>-- Reduce reader/writer blocking with row versioning:
+ALTER DATABASE MyDb SET READ_COMMITTED_SNAPSHOT ON;</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q49</span>Parameter sniffing</div>
+<div class="say"><b>How to answer</b>&#x27;SQL Server caches a plan built for the FIRST parameter value; with skewed data that plan is terrible for other values. I fix it with RECOMPILE, OPTIMIZE FOR, or local variables — and 2022 has Parameter Sensitive Plans.&#x27;</div>
+<pre>SELECT * FROM Orders WHERE CustomerId = @cid
+OPTION (RECOMPILE);   -- fresh plan per execution for skewed data</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q50</span>Execution plan analysis</div>
+<div class="say"><b>How to answer</b>&#x27;I read the ACTUAL plan and hunt for scans where I expected seeks, key lookups I can eliminate with INCLUDE, big gaps between estimated and actual rows meaning stale stats, and spills to tempdb.&#x27;</div>
+<pre>SET STATISTICS IO, TIME ON;   -- measure logical reads + CPU alongside the plan</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q51</span>Normalization vs Denormalization</div>
+<div class="say"><b>How to answer</b>&#x27;Normalize for integrity and write efficiency — OLTP is usually 3NF. Denormalize deliberately for read speed — reporting. When I need both, I use indexed views or a separate read model.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q52</span>Transactions &amp; isolation levels</div>
+<div class="say"><b>How to answer</b>Order them by strictness and name what each prevents: &#x27;Read Uncommitted allows dirty reads; Read Committed is the default; Repeatable Read stops non-repeatable reads; Serializable stops phantoms; Snapshot uses row versioning so readers don&#x27;t block writers.&#x27;</div>
+<pre>SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
+BEGIN TRAN;
+  -- readers see a consistent version, writers don&#x27;t block them
+COMMIT;</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q53</span>Detect / find and remove duplicate records</div>
+<div class="say"><b>How to answer</b>&#x27;I find duplicates with GROUP BY … HAVING COUNT(*) &gt; 1, then delete extras with ROW_NUMBER keeping one, and add a unique constraint so it can&#x27;t recur.&#x27;</div>
+<pre>WITH d AS (
+  SELECT *, ROW_NUMBER() OVER (PARTITION BY Email ORDER BY Id) rn
+  FROM Users
+)
+DELETE FROM d WHERE rn &gt; 1;</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q54</span>HAVING vs WHERE</div>
+<div class="say"><b>How to answer</b>&#x27;WHERE filters rows before grouping; HAVING filters groups after aggregation and can reference aggregates. I push as much as possible into WHERE for performance.&#x27;</div>
+<pre>SELECT CustomerId, COUNT(*) AS Orders
+FROM Orders
+WHERE Status = &#x27;Complete&#x27;        -- before grouping
+GROUP BY CustomerId
+HAVING COUNT(*) &gt; 5;             -- after aggregation</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q55</span>How would you optimize a slow SQL query?</div>
+<div class="say"><b>How to answer</b>&#x27;I read the actual plan, make sure predicates are SARGable — no functions on the indexed column — add covering indexes, select only needed columns, update stats, and check for parameter sniffing.&#x27;</div>
+<pre>-- NON-SARGable — can&#x27;t seek the index:
+WHERE YEAR(OrderDate) = 2026
+-- SARGable — can seek:
+WHERE OrderDate &gt;= &#x27;2026-01-01&#x27; AND OrderDate &lt; &#x27;2027-01-01&#x27; </pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q56</span>How would you handle slow-running stored procedures?</div>
+<div class="say"><b>How to answer</b>&#x27;Same plan analysis, plus proc-specific fixes: SET NOCOUNT ON, replace cursors with set-based logic, handle parameter sniffing, and avoid the catch-all @p IS NULL OR col=@p pattern which kills index usage.&#x27;</div>
+<pre>-- catch-all params: use RECOMPILE or dynamic SQL instead of:
+WHERE (@status IS NULL OR Status = @status)   -- forces a scan</pre>
+</div>
+<a class="top" href="#top">↑ top</a>
+<h2 id="s3">Azure &amp; DevOps <span class="count">(13)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q57</span>Azure App Service vs Functions / AKS / Kubernetes</div>
+<div class="say"><b>How to answer</b>Frame it as a control-vs-ops spectrum: &#x27;App Service is PaaS with minimal ops; Functions is serverless and event-driven, scales to zero; AKS gives full control at the highest ops cost. I pick by how much control I need versus how much ops I want to own.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q58</span>Azure Key Vault - use cases</div>
+<div class="say"><b>How to answer</b>&#x27;Central store for secrets, keys and certificates. The point is apps reach it with a Managed Identity, so there are zero credentials in code or config, plus rotation and audit logging.&#x27;</div>
+<pre>// App Service setting references the vault directly:
+// @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/DbConn/)
+// resolved at runtime via the app&#x27;s managed identity — no secret in config.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q59</span>Azure Service Bus</div>
+<div class="say"><b>How to answer</b>&#x27;Enterprise broker — queues for point-to-point, topics for pub-sub. What makes it enterprise: sessions for ordering, dead-letter queues, duplicate detection, scheduled delivery. For streaming I&#x27;d use Event Hubs instead.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q60</span>Azure Blob Storage vs Azure File Storage</div>
+<div class="say"><b>How to answer</b>&#x27;Blob is object storage for unstructured data with Hot/Cool/Archive tiers. Files is a managed SMB share you mount like a network drive — for lift-and-shift apps that expect a filesystem.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q61</span>Azure API Management</div>
+<div class="say"><b>How to answer</b>&#x27;A managed gateway: publish, secure, rate-limit, transform, cache and version APIs with a developer portal — all via inbound/outbound policies without touching backend code.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q62</span>Application Insights - how to monitor production apps?</div>
+<div class="say"><b>How to answer</b>&#x27;It&#x27;s the APM layer — automatic request and dependency telemetry, exceptions, live metrics, distributed tracing via operation IDs. I query with KQL, build dashboards, and set alerts, sampling to control cost.&#x27;</div>
+<pre>// KQL: slowest endpoints in the last hour
+requests
+| where timestamp &gt; ago(1h)
+| summarize p95=percentile(duration,95) by name
+| order by p95 desc</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q63</span>CI/CD pipeline using Azure DevOps</div>
+<div class="say"><b>How to answer</b>&#x27;A YAML pipeline in the repo: CI builds, tests and publishes an artifact on PR; CD promotes that same artifact through dev, QA and prod with approvals, deploying infra via Bicep then swapping slots. Secrets come from variable groups linked to Key Vault.&#x27;</div>
+<pre>stages:
+- stage: Build
+  jobs: [ { steps: [ dotnet build, dotnet test, publish artifact ] } ]
+- stage: Prod
+  condition: succeeded()
+  jobs: [ { steps: [ deploy to staging slot, swap slots ] } ]</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q64</span>Docker vs Kubernetes</div>
+<div class="say"><b>How to answer</b>&#x27;Docker packages and runs one container — the box. Kubernetes orchestrates many across a cluster: scheduling, autoscaling, self-healing, rolling updates — the fleet manager.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q65</span>Blue-Green vs Canary deployment</div>
+<div class="say"><b>How to answer</b>&#x27;Blue-green keeps two environments and switches all traffic at once — instant rollback by switching back. Canary sends a small percentage to the new version, watches metrics, then ramps up — safer detection, slower rollout.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q66</span>How to implement zero-downtime deployment?</div>
+<div class="say"><b>How to answer</b>The key insight interviewers want is the database: &#x27;Slot-swap or rolling updates handle the app, but the real trick is backward-compatible migrations — expand-contract — so old and new code run against the same schema. Feature flags decouple release from deploy.&#x27;</div>
+<pre>-- Expand-contract: add nullable column now, backfill, make required LATER
+ALTER TABLE Orders ADD ShippingRegion NVARCHAR(50) NULL;  -- step 1, safe</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q67</span>Infrastructure as Code (ARM / Bicep)</div>
+<div class="say"><b>How to answer</b>&#x27;I declare infrastructure in source-controlled Bicep for repeatable, reviewable environments with no drift. Bicep is the concise DSL that compiles to ARM, with modules and per-environment parameters, deployed from the pipeline.&#x27;</div>
+<pre>resource site &#x27;Microsoft.Web/sites@2023-01-01&#x27; = {
+  name: siteName
+  location: location
+  properties: { serverFarmId: plan.id }
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q68</span>Logging &amp; distributed tracing</div>
+<div class="say"><b>How to answer</b>&#x27;Structured logging with a correlation ID on every request, and I propagate W3C trace context across service calls so one operation ID stitches the whole flow. Logs, metrics and traces are the three pillars, exported via OpenTelemetry.&#x27;</div>
+<pre>Log.ForContext(&quot;CorrelationId&quot;, ctx.TraceIdentifier)
+   .Information(&quot;Order {OrderId} placed&quot;, order.Id);</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q69</span>How to secure secrets / connection strings across environments?</div>
+<div class="say"><b>How to answer</b>&#x27;Key Vault per environment via Managed Identity — nothing in appsettings or source control. Pipelines pull from variable groups linked to the vault; local dev uses user secrets; I rotate and audit access.&#x27;</div>
+</div>
+<a class="top" href="#top">↑ top</a>
+<h2 id="s4">Microservices &amp; System Design <span class="count">(15)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q70</span>Monolith vs Microservices</div>
+<div class="say"><b>How to answer</b>Give the balanced answer and the recommendation: &#x27;Monolith is simpler to build and deploy but hits scaling and team-autonomy limits. Microservices give independent scaling and releases at the cost of distributed complexity. I&#x27;d start with a modular monolith and split when team size and scale justify it.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q71</span>API Gateway - benefits and use cases</div>
+<div class="say"><b>How to answer</b>&#x27;A single entry point in front of services handling routing, auth, rate limiting, TLS termination and aggregation — it hides internal topology and centralizes cross-cutting policy. Azure APIM, Ocelot, YARP.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q72</span>Circuit Breaker pattern</div>
+<div class="say"><b>How to answer</b>Explain the three states — that&#x27;s the substance: &#x27;After N failures it opens and fails fast; after a cooldown it goes half-open to test with one call; if that succeeds it closes. It stops me hammering a struggling dependency and prevents cascading failure.&#x27;</div>
+<pre>var pipeline = new ResiliencePipelineBuilder()
+    .AddCircuitBreaker(new() { FailureRatio = 0.5, BreakDuration = TimeSpan.FromSeconds(30) })
+    .Build();   // Polly / Microsoft.Extensions.Resilience</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q73</span>CQRS pattern</div>
+<div class="say"><b>How to answer</b>&#x27;Separate the write model — normalized, consistent — from the read model — denormalized, fast. Each scales independently. The cost is eventual consistency between them, so I only use it where read and write shapes really differ.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q74</span>Event-Driven architecture</div>
+<div class="say"><b>How to answer</b>&#x27;Services publish events; consumers react asynchronously — loose coupling and resilience. The challenges are eventual consistency and duplicate delivery, so consumers must be idempotent and I use the outbox pattern for reliable publishing.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q75</span>Service-to-service communication / discovery</div>
+<div class="say"><b>How to answer</b>&#x27;Sync via HTTP or gRPC — fast but couples availability. Async via a broker — decoupled and resilient. Discovery is usually Kubernetes DNS or the cloud load balancer. I prefer async where the workflow allows.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q76</span>Distributed transactions</div>
+<div class="say"><b>How to answer</b>Lead with what NOT to do: &#x27;I avoid two-phase commit — it doesn&#x27;t scale. Instead a Saga: a chain of local transactions with compensating actions on failure, plus the outbox pattern so the DB write and event publish are atomic.&#x27;</div>
+<pre>// Saga: Reserve inventory → Authorize payment → Confirm order
+// If payment fails → compensate: Release inventory (undo previous step)</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q77</span>How to prevent cascading failures?</div>
+<div class="say"><b>How to answer</b>&#x27;Timeouts on every remote call, retries with exponential backoff and jitter for transient errors only, circuit breakers, bulkheads to isolate resource pools, and fallbacks for graceful degradation.&#x27;</div>
+<pre>var pipeline = new ResiliencePipelineBuilder()
+    .AddTimeout(TimeSpan.FromSeconds(2))
+    .AddRetry(new() { BackoffType = DelayBackoffType.Exponential, UseJitter = true })
+    .AddCircuitBreaker(new())
+    .Build();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q78</span>How to ensure fault tolerance / high availability?</div>
+<div class="say"><b>How to answer</b>&#x27;Redundancy across availability zones, stateless services behind load balancers with health probes, replicated data with automated failover, client-side retries and circuit breakers, and IaC so I can rebuild fast. I verify it with chaos testing.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q79</span>How to handle high throughput?</div>
+<div class="say"><b>How to answer</b>&#x27;Async I/O end to end, horizontal scaling of stateless services, caching to absorb reads, queues to buffer spikes, efficient serialization, connection pooling, and data partitioning to avoid hot spots.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q80</span>Design a scalable Order Management / E-Commerce system</div>
+<div class="say"><b>How to answer</b>Name the services, then walk the hardest flow — checkout — because that&#x27;s where the design lives.</div>
+<pre>// Services behind a gateway: Catalog, Cart, Order, Payment, Inventory, Notification
+// Checkout = orchestrated SAGA:
+//   reserve inventory → authorize payment → confirm order
+//   any failure → compensate previous steps
+// Idempotency key on checkout; Redis for cart/catalog; read replicas for browsing;
+// OrderPlaced event (outbox) drives Notification + Inventory asynchronously.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q81</span>Design a Payment Processing system</div>
+<div class="say"><b>How to answer</b>Hit the four non-negotiables: &#x27;Idempotency keys so retries don&#x27;t double-charge, a double-entry ledger as source of truth, a per-payment state machine, and PCI scope isolation through tokenization.&#x27;</div>
+<pre>// State machine: Initiated → Authorized → Captured | Failed
+// Idempotency key + unique constraint = exactly-once effect
+// Ledger is append-only; reconciliation job compares against the gateway daily</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q82</span>Message queue (Kafka / RabbitMQ) - when and why?</div>
+<div class="say"><b>How to answer</b>&#x27;RabbitMQ is a smart broker with flexible routing — task queues and work distribution. Kafka is a distributed log with replay — high-throughput event streaming and event sourcing. Queue: the message is gone once consumed. Log: it&#x27;s retained and replayable.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q83</span>Caching strategies (Memory / Redis)</div>
+<div class="say"><b>How to answer</b>&#x27;Cache-aside is my default — load on miss, set a TTL, invalidate on write. In-memory is per-instance and fastest; Redis is shared across instances and survives restarts. I guard against stampede with locking or early refresh.&#x27;</div>
+<pre>var order = await _cache.GetOrCreateAsync($&quot;order:{id}&quot;, async e =&gt; {
+    e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+    return await _repo.GetAsync(id);
+});</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q84</span>How to design a scalable financial reporting platform?</div>
+<div class="say"><b>How to answer</b>&#x27;I separate OLTP from reporting — stream changes via events or CDC into a read-optimized columnar store, pre-aggregate into marts, partition by date, and reconcile against source. Posted figures are immutable, and late-arriving data triggers reprocessing.&#x27;</div>
+</div>
+<a class="top" href="#top">↑ top</a>
+<h2 id="s5">Scenario / Production <span class="count">(15)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q85</span>API response time jumped (200ms→8s) after deployment — investigate first?</div>
+<div class="say"><b>How to answer</b>Lead with the instinct they want: what changed. &#x27;First I diff the deployment — code, config, schema. Then APM traces tell me WHERE the time goes. If users are bleeding I roll back first and diagnose offline.&#x27;</div>
+<pre>// Suspects in order: plan regression from schema/stats change,
+// a new N+1 query, connection-pool exhaustion, cold caches, GC pressure.
+// Mitigate (roll back) → then root-cause from traces.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q86</span>One SQL query blocking many transactions — troubleshoot?</div>
+<div class="say"><b>How to answer</b>&#x27;I find the head blocker with sp_whoisactive, look at its statement and open transaction, kill it if it&#x27;s a runaway, then fix the root cause — usually a missing index causing scans or a transaction held open too long.&#x27;</div>
+<pre>EXEC sp_whoWho_isactive;   -- or sys.dm_exec_requests + sys.dm_tran_locks
+-- Root causes: missing index → scan → lock; long transaction; lock escalation
+-- Durable fix: add index, shorten transaction, batch DML, enable RCSI</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q87</span>Traffic increased 10x overnight — how to scale?</div>
+<div class="say"><b>How to answer</b>Split into now vs next: &#x27;Immediately I scale out the stateless tier, turn on caching and CDN, and rate-limit non-critical endpoints to protect the core. Then queue deferrable work, add read replicas, and fix hot-path N+1s.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q88</span>Deployment introduced bugs — safe rollback?</div>
+<div class="say"><b>How to answer</b>&#x27;I redeploy the previous immutable artifact or swap slots back — instant. The catch is always the database: migrations must be backward-compatible so old code runs on the new schema. If it&#x27;s flagged, I just flip the flag off.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q89</span>Client requests 99.99% availability — what architecture?</div>
+<div class="say"><b>How to answer</b>Quantify it first — that impresses: &#x27;99.99% is about 52 minutes of downtime a year, so I need redundancy everywhere — multi-zone or multi-region, stateless services behind LBs, replicated data with automated failover, zero-downtime deploys, and tested DR runbooks.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q90</span>Design a database for 100M+ records</div>
+<div class="say"><b>How to answer</b>&#x27;Partition by date or tenant so queries prune to relevant partitions, archive cold data, use covering indexes for hot queries, add read replicas for reporting, and only shard across servers when a single instance genuinely can&#x27;t cope — sharding adds real complexity.&#x27;</div>
+<pre>-- Partition by month so a date-range query touches only relevant partitions
+CREATE PARTITION FUNCTION pf_Date (date)
+AS RANGE RIGHT FOR VALUES (&#x27;2026-01-01&#x27;,&#x27;2026-02-01&#x27;, ...);</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q91</span>How to handle 1 Million API requests per day?</div>
+<div class="say"><b>How to answer</b>Defuse the scary number with math — it shows judgment: &#x27;A million a day is only about 12 requests a second on average — a well-built single service handles that. I&#x27;d still add a load balancer with two or three instances for HA, Redis for hot reads, and a queue for heavy work.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q92</span>Duplicate financial transactions from retries — prevent?</div>
+<div class="say"><b>How to answer</b>&#x27;Idempotency keys: the client sends a unique key per logical transaction, I store the key with its result and replay it on retries. A unique constraint on the business key is the last line of defense, and consumers must be idempotent since messages redeliver.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q93</span>One microservice keeps failing — stop cascading failures?</div>
+<div class="say"><b>How to answer</b>&#x27;I wrap calls to it with a timeout and circuit breaker so callers fail fast, serve a fallback where acceptable, and bulkhead its connection pool so it can&#x27;t starve shared resources — while I fix the root cause.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q94</span>Design a secure, HA payment platform (millions/day)</div>
+<div class="say"><b>How to answer</b>&#x27;Multi-region active-active, event-driven with outbox and idempotent consumers, a double-entry ledger, tokenized card data with PCI scope minimized, exactly-once via idempotency keys plus unique constraints, end-to-end tracing, and daily reconciliation.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q95</span>How to handle large file uploads?</div>
+<div class="say"><b>How to answer</b>The senior answer is don&#x27;t proxy it: &#x27;I issue a SAS URL and have the client upload directly to blob storage, chunked and resumable. If it must pass through the API I stream it rather than buffering, enforce size limits early, and virus-scan asynchronously.&#x27;</div>
+<pre>// Server issues a short-lived SAS; browser PUTs straight to blob storage.
+var sas = blob.GenerateSasUri(BlobSasPermissions.Write, DateTimeOffset.UtcNow.AddMinutes(15));</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q96</span>How to ensure data consistency in distributed systems?</div>
+<div class="say"><b>How to answer</b>&#x27;I accept eventual consistency between services and keep local ACID transactions within one. Sagas with compensation for multi-service workflows, outbox/inbox for reliable messaging, idempotent consumers, optimistic concurrency, and reconciliation jobs to catch drift.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q97</span>How to handle partial failures in microservices?</div>
+<div class="say"><b>How to answer</b>&#x27;I assume any call can fail: timeouts, retries with backoff for transient errors only, circuit breakers, fallbacks, bulkheads, dead-letter queues for poison messages, and idempotent operations so retries are safe.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q98</span>A new feature causes performance degradation — identify and fix?</div>
+<div class="say"><b>How to answer</b>&#x27;If it&#x27;s flagged I turn it off for instant relief, then compare traces before and after to isolate the slow span. Usual suspects: an N+1 query, a missing index for the new query, or sync-over-async. Fix, load test, re-enable via canary.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q99</span>How to handle rollback if deployment fails?</div>
+<div class="say"><b>How to answer</b>&#x27;I automate it — post-deploy health checks gate the pipeline and probe failures trigger auto-rollback to the previous artifact. Releases are immutable and versioned, migrations are expand-contract, and feature flags are the fastest rollback of all.&#x27;</div>
+</div>
+<a class="top" href="#top">↑ top</a>
+<h2 id="s6">Design Patterns &amp; OOP <span class="count">(8)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q100</span>Explain SOLID principles with examples</div>
+<div class="say"><b>How to answer</b>Give a one-line example per letter — that&#x27;s what separates memorized from understood.</div>
+<pre>S  Single Responsibility — invoice calc separate from invoice printing
+O  Open/Closed          — new discount = new class, not a new if-branch
+L  Liskov Substitution  — a subtype must work anywhere the base does
+I  Interface Segregation— small focused interfaces, not one fat one
+D  Dependency Inversion — depend on IOrderRepo, inject the concrete via DI</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q101</span>Which design pattern would you use for logging?</div>
+<div class="say"><b>How to answer</b>&#x27;.NET&#x27;s own logging is the answer: a Factory creates category loggers, the factory is effectively a Singleton, and I enrich via the Decorator pattern by wrapping providers. Cross-cutting logging can also go in middleware.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q102</span>Factory vs Builder / Factory vs Abstract Factory</div>
+<div class="say"><b>How to answer</b>&#x27;Factory Method creates one product and lets subclasses pick which. Abstract Factory creates families of related products. Builder assembles one complex object step by step — it&#x27;s about HOW to build, not just WHICH class.&#x27;</div>
+<pre>// Builder — fluent step-by-step assembly
+var host = Host.CreateDefaultBuilder(args)
+    .ConfigureServices(...)
+    .ConfigureLogging(...)
+    .Build();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q103</span>Singleton pattern - pros &amp; cons</div>
+<div class="say"><b>How to answer</b>&#x27;One shared instance with controlled access — but it&#x27;s global mutable state, hides dependencies, and is hard to test. So modern practice is: don&#x27;t hand-roll it, register the class with Singleton lifetime in DI and inject it.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q104</span>Strategy pattern use case</div>
+<div class="say"><b>How to answer</b>&#x27;Swap algorithms at runtime behind a common interface, killing if/else chains — payment providers, shipping calculators, export formats. I register the strategies in DI and resolve by key.&#x27;</div>
+<pre>public interface IPaymentStrategy { Task&lt;Result&gt; PayAsync(decimal amt); }
+// RazorpayStrategy, EasebuzzStrategy … resolved by payment method at runtime</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q105</span>Observer / Decorator / Repository / DI patterns</div>
+<div class="say"><b>How to answer</b>&#x27;Observer is pub-sub — C# events, domain events. Decorator wraps an object to add behavior — a caching decorator over a repository. Repository abstracts data access. DI inverts dependencies so classes receive abstractions via the constructor.&#x27;</div>
+<pre>// Decorator — add caching without touching the real repo
+public class CachedOrderRepo(IOrderRepo inner, IMemoryCache cache) : IOrderRepo {
+    public Task&lt;Order?&gt; GetAsync(int id) =&gt;
+        cache.GetOrCreateAsync($&quot;o:{id}&quot;, _ =&gt; inner.GetAsync(id));
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q106</span>Factory pattern vs Strategy pattern</div>
+<div class="say"><b>How to answer</b>&#x27;Factory is creational — it decides WHICH object to instantiate. Strategy is behavioral — it decides WHICH algorithm to run. They combine: a factory often selects and returns the right strategy.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q107</span>Which design patterns have you used in your projects?</div>
+<div class="say"><b>How to answer</b>This is a YOU question — use your real work. From your courier/Shopify background:</div>
+<pre>// Speak from experience, e.g.:
+// - Strategy for per-carrier integrations (DHL, FedEx, SF Global)
+// - Factory to select the carrier strategy from an order&#x27;s shipping method
+// - Circuit Breaker + Retry via Polly on carrier APIs
+// - Repository + Unit of Work over EF Core
+// - Decorator via DelegatingHandlers for auth/logging on HttpClient
+// Always tie each pattern to the concrete problem it solved.</pre>
+</div>
+<a class="top" href="#top">↑ top</a>
+<h2 id="s7">Security <span class="count">(12)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q108</span>How to prevent SQL Injection?</div>
+<div class="say"><b>How to answer</b>&#x27;Parameterized queries or an ORM — never concatenate input into SQL. Plus a least-privilege DB account and input validation as defense in depth.&#x27;</div>
+<pre>// SAFE — parameterized
+var user = await conn.QueryFirstOrDefaultAsync&lt;User&gt;(
+    &quot;SELECT * FROM Users WHERE Email = @e&quot;, new { e = email });
+// NEVER: &quot;... WHERE Email = &#x27;&quot; + email + &quot;&#x27;&quot;</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q109</span>How to prevent XSS attacks?</div>
+<div class="say"><b>How to answer</b>&#x27;Encode output by context — Razor auto-encodes, so I&#x27;m careful with Html.Raw. Sanitize rich text with an allow-list, set a Content-Security-Policy header, and use HttpOnly cookies so scripts can&#x27;t steal them.&#x27;</div>
+<pre>// In the SPA, never do: element.innerHTML = userInput;
+// Use textContent or framework binding, which auto-escapes.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q110</span>What is CSRF and how to prevent it?</div>
+<div class="say"><b>How to answer</b>&#x27;CSRF tricks a logged-in browser into sending an unwanted request because cookies auto-attach. I prevent it with anti-forgery tokens, SameSite cookies, and for APIs I prefer Bearer tokens in a header — browsers don&#x27;t auto-attach those, so they&#x27;re inherently CSRF-resistant.&#x27;</div>
+<pre>[ValidateAntiForgeryToken]   // MVC form posts
+// APIs: Authorization: Bearer &lt;jwt&gt;  → not auto-sent by the browser → safe</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q111</span>How does JWT authentication work? / JWT vs OAuth2</div>
+<div class="say"><b>How to answer</b>&#x27;It&#x27;s header.payload.signature, signed by the issuer. I validate signature, expiry, issuer and audience on every request — stateless. Access tokens stay short-lived with refresh tokens; nothing secret goes in the payload since it&#x27;s only base64.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q112</span>What is OAuth2 and how does it work?</div>
+<div class="say"><b>How to answer</b>&#x27;A delegated authorization framework. Roles: resource owner, client, authorization server, resource server. Authorization Code + PKCE for user-facing apps, Client Credentials for service-to-service. It issues access tokens; OpenID Connect adds identity on top.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q113</span>How to store passwords securely?</div>
+<div class="say"><b>How to answer</b>Be emphatic — this is a red-flag question: &#x27;Never encrypt or store plaintext. I use a slow, salted, adaptive hash — PBKDF2, bcrypt or Argon2id — with a unique salt per user, and rehash on login when the work factor increases. Plus MFA.&#x27;</div>
+<pre>var hash = new PasswordHasher&lt;User&gt;().HashPassword(user, password); // PBKDF2, salted</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q114</span>Authentication vs Authorization</div>
+<div class="say"><b>How to answer</b>&#x27;Authentication is who you are — validating credentials into an identity with claims. Authorization is what you can do — roles and policies. In ASP.NET Core UseAuthentication builds the principal, UseAuthorization enforces it.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q115</span>Rate limiting / throttling - how to implement?</div>
+<div class="say"><b>How to answer</b>&#x27;In-app I use the built-in RateLimiter keyed per user or API key, returning 429 with Retry-After. Across scaled-out instances I back it with Redis or enforce at the gateway so the limit is global.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q116</span>How to implement Role-Based Access Control (RBAC)?</div>
+<div class="say"><b>How to answer</b>&#x27;Roles carry permissions and ride in the JWT as claims. I enforce with policy-based authorization mapping policies to permission claims — more flexible than raw role checks — and use authorization handlers for resource-level rules.&#x27;</div>
+<pre>builder.Services.AddAuthorization(o =&gt;
+    o.AddPolicy(&quot;CanApprove&quot;, p =&gt; p.RequireClaim(&quot;perm&quot;, &quot;orders.approve&quot;)));
+[Authorize(Policy = &quot;CanApprove&quot;)] public IActionResult Approve() { ... }</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q117</span>How to validate and sanitize user input?</div>
+<div class="say"><b>How to answer</b>&#x27;Always validate server-side — client validation is UX only. Allow-list rules via data annotations or FluentValidation, reject early with 400 and ProblemDetails, and sanitize wherever content is rendered. Validate file uploads by content, not extension.&#x27;</div>
+<pre>public class OrderValidator : AbstractValidator&lt;OrderDto&gt; {
+    public OrderValidator() {
+        RuleFor(x =&gt; x.Email).NotEmpty().EmailAddress();
+        RuleFor(x =&gt; x.Qty).InclusiveBetween(1, 100);
+    }
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q118</span>Best practices for securing APIs / OWASP</div>
+<div class="say"><b>How to answer</b>&#x27;HTTPS, OAuth2/JWT with short expiry, least-privilege scopes, object-level authorization checks — BOLA is the number-one API risk — rate limiting, input validation, no secrets in logs or URLs, and dependency scanning. I follow the OWASP API Top 10.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q119</span>CORS and its use cases</div>
+<div class="say"><b>How to answer</b>&#x27;CORS is a browser mechanism — the server says which origins may call it cross-origin and the browser enforces it, with a preflight for non-simple requests. I need it when my SPA and API are on different domains. It&#x27;s not a security boundary for non-browser clients — auth still does that.&#x27;</div>
+</div>
+<a class="top" href="#top">↑ top</a>
+<h2 id="s8">Coding &amp; DSA <span class="count">(13)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q120</span>Reverse a string</div>
+<div class="say"><b>How to answer</b>State the approach and complexity before you code — that&#x27;s the habit interviewers grade: &#x27;Two pointers swapping inward, O(n) time and O(1) extra.&#x27;</div>
+<pre>public static string Reverse(string s) {
+    var a = s.ToCharArray();
+    int i = 0, j = a.Length - 1;
+    while (i &lt; j) { (a[i], a[j]) = (a[j], a[i]); i++; j--; }
+    return new string(a);
+}
+// Library one-liner: new string(s.Reverse().ToArray());</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q121</span>Check if a string is a palindrome</div>
+<div class="say"><b>How to answer</b>&#x27;Two pointers from both ends, O(n)/O(1). I&#x27;d clarify whether to ignore case and punctuation first.&#x27;</div>
+<pre>public static bool IsPalindrome(string s) {
+    int i = 0, j = s.Length - 1;
+    while (i &lt; j) if (s[i++] != s[j--]) return false;
+    return true;
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q122</span>Find the missing number in an array</div>
+<div class="say"><b>How to answer</b>Offer both, and note why XOR is safer: &#x27;Sum formula is cleanest; XOR avoids any overflow risk. Both O(n)/O(1).&#x27;</div>
+<pre>// 1..n with one missing:
+int missing = n * (n + 1) / 2 - arr.Sum();
+// Overflow-safe: XOR all values with all indices 1..n; the leftover is missing.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q123</span>Remove duplicate characters</div>
+<div class="say"><b>How to answer</b>&#x27;One pass with a HashSet of seen chars, appending only new ones — preserves first-occurrence order, O(n).&#x27;</div>
+<pre>public static string RemoveDupes(string s) {
+    var seen = new HashSet&lt;char&gt;(); var sb = new StringBuilder();
+    foreach (var c in s) if (seen.Add(c)) sb.Append(c);
+    return sb.ToString();
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q124</span>Find first non-repeating character</div>
+<div class="say"><b>How to answer</b>&#x27;Two passes: count occurrences, then return the first char with count one. O(n), O(1) for a bounded alphabet.&#x27;</div>
+<pre>public static char? FirstUnique(string s) {
+    var count = new Dictionary&lt;char,int&gt;();
+    foreach (var c in s) count[c] = count.GetValueOrDefault(c) + 1;
+    foreach (var c in s) if (count[c] == 1) return c;
+    return null;
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q125</span>Implement an LRU Cache</div>
+<div class="say"><b>How to answer</b>&#x27;Dictionary plus a doubly linked list — Get moves the node to the front, Put inserts at front and evicts the tail when full. Both O(1).&#x27;</div>
+<pre>public class LruCache&lt;K,V&gt; {
+    private readonly int _cap;
+    private readonly Dictionary&lt;K, LinkedListNode&lt;(K,V)&gt;&gt; _map = new();
+    private readonly LinkedList&lt;(K,V)&gt; _list = new();
+    public LruCache(int cap) =&gt; _cap = cap;
+    public V? Get(K k) {
+        if (!_map.TryGetValue(k, out var n)) return default;
+        _list.Remove(n); _list.AddFirst(n); return n.Value.Item2;
+    }
+    public void Put(K k, V v) {
+        if (_map.TryGetValue(k, out var n)) { _list.Remove(n); }
+        else if (_map.Count &gt;= _cap) {
+            _map.Remove(_list.Last!.Value.Item1); _list.RemoveLast();
+        }
+        var node = new LinkedListNode&lt;(K,V)&gt;((k, v));
+        _list.AddFirst(node); _map[k] = node;
+    }
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q126</span>Implement Binary Search</div>
+<div class="say"><b>How to answer</b>&#x27;Sorted array required. Note the mid = lo + (hi-lo)/2 trick to avoid overflow. O(log n).&#x27;</div>
+<pre>public static int BinarySearch(int[] a, int target) {
+    int lo = 0, hi = a.Length - 1;
+    while (lo &lt;= hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (a[mid] == target) return mid;
+        if (a[mid] &lt; target) lo = mid + 1; else hi = mid - 1;
+    }
+    return -1;
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q127</span>Design a HashSet and explain its use</div>
+<div class="say"><b>How to answer</b>&#x27;Array of buckets, hash mod bucket count picks a bucket, collisions chain in a list, and it resizes when the load factor is exceeded. Average O(1) add/contains. Used for dedup and membership tests.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q128</span>Flatten a nested list</div>
+<div class="say"><b>How to answer</b>&#x27;Recurse into sublists, append leaves. I&#x27;d mention the iterative stack version avoids stack-overflow on very deep nesting.&#x27;</div>
+<pre>static IEnumerable&lt;int&gt; Flatten(object item) {
+    if (item is IEnumerable&lt;object&gt; list)
+        foreach (var x in list) foreach (var y in Flatten(x)) yield return y;
+    else yield return (int)item;
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q129</span>Implement pagination logic</div>
+<div class="say"><b>How to answer</b>&#x27;Offset pagination is skip/take, but for deep pages I switch to keyset pagination — WHERE id &gt; lastSeen — which stays O(1) regardless of depth.&#x27;</div>
+<pre>-- Offset:
+ORDER BY Id OFFSET @skip ROWS FETCH NEXT @size ROWS ONLY;
+-- Keyset (fast for deep pages):
+WHERE Id &gt; @lastSeenId ORDER BY Id;</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q130</span>Find duplicates in an array</div>
+<div class="say"><b>How to answer</b>&#x27;HashSet — if Add returns false it&#x27;s a duplicate, O(n). For values 1..n I could do it in O(1) space with index-marking.&#x27;</div>
+<pre>var seen = new HashSet&lt;int&gt;();
+var dupes = arr.Where(x =&gt; !seen.Add(x)).Distinct();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q131</span>Frequency of digits in a number (0–9 counts)</div>
+<div class="say"><b>How to answer</b>&#x27;A size-10 int array, extract each digit with mod-10 and divide-by-10. Handle zero and negatives. O(number of digits).&#x27;</div>
+<pre>static int[] DigitFrequency(int n) {
+    var count = new int[10];
+    n = Math.Abs(n);
+    if (n == 0) { count[0] = 1; return count; }
+    while (n &gt; 0) { count[n % 10]++; n /= 10; }
+    return count;
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q132</span>Largest and smallest digit in a number</div>
+<div class="say"><b>How to answer</b>&#x27;Same extraction loop, tracking max and min. Start max at 0 and min at 9, handle negatives with Abs. O(number of digits).&#x27;</div>
+<pre>static (int min, int max) MinMaxDigit(int n) {
+    n = Math.Abs(n);
+    int min = 9, max = 0;
+    if (n == 0) return (0, 0);
+    while (n &gt; 0) { int d = n % 10; max = Math.Max(max, d); min = Math.Min(min, d); n /= 10; }
+    return (min, max);
+}</pre>
+</div>
+<a class="top" href="#top">↑ top</a>
+<h2 id="s9">Other Concepts <span class="count">(12)</span></h2>
+<div class="qa">
+<div class="q"><span class="num">Q133</span>Clean Architecture - layers</div>
+<div class="say"><b>How to answer</b>The one thing to nail is the dependency direction: &#x27;Dependencies point inward. Domain has zero dependencies; Application defines interfaces; Infrastructure implements them; Presentation sits outside. Business logic never references a framework.&#x27;</div>
+<pre>// Domain  ← Application ← Infrastructure
+//                       ← Presentation (API)
+// Application defines IOrderRepository; Infrastructure implements it with EF Core.</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q134</span>Async/Await &amp; Task Parallel Library</div>
+<div class="say"><b>How to answer</b>&#x27;async/await is for I/O-bound work — it frees threads during waits. TPL — Parallel.ForEach, PLINQ — is for CPU-bound parallelism across cores. Different problems. And never block on async with .Result.&#x27;</div>
+<pre>// Concurrent independent I/O:
+var results = await Task.WhenAll(ids.Select(id =&gt; _api.GetAsync(id)));</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q135</span>LINQ - deferred vs immediate execution</div>
+<div class="say"><b>How to answer</b>This one has a real bug attached — tell it: &#x27;Where and Select are deferred — they run when enumerated, so enumerating twice hits the database twice. ToList forces immediate execution. I materialize once when reusing results.&#x27;</div>
+<pre>var q = db.Orders.Where(o =&gt; o.Total &gt; 100);  // nothing runs yet
+var list = q.ToList();   // executes NOW — reuse `list`, not `q`, to avoid re-querying</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q136</span>DTO vs ViewModel</div>
+<div class="say"><b>How to answer</b>&#x27;A DTO is a flat data carrier crossing boundaries — API contracts. A ViewModel is shaped for one specific screen and may combine sources. DTO serves the wire; ViewModel serves the view.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q137</span>AutoMapper - why &amp; when?</div>
+<div class="say"><b>How to answer</b>Add the 2026 caveat — it signals you&#x27;re current: &#x27;It removes repetitive entity-to-DTO mapping and ProjectTo pushes the mapping into the SQL. I use it for simple 1:1 maps and hand-map complex ones. Note AutoMapper went commercial in 2025, so many teams now use Mapperly or manual mapping.&#x27;</div>
+<pre>var dtos = await db.Orders
+    .ProjectTo&lt;OrderDto&gt;(_config)   // translates into SELECT of only mapped columns
+    .ToListAsync();</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q138</span>Idempotency in APIs</div>
+<div class="say"><b>How to answer</b>&#x27;The same request applied multiple times has the same effect as once — essential because clients and queues retry. Idempotency keys, naturally idempotent verbs, and unique constraints on business keys.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q139</span>RESTful API best practices</div>
+<div class="say"><b>How to answer</b>&#x27;Resource nouns not verbs, correct verbs and status codes — 201 with a Location on create, 204 on delete — pagination and filtering on collections, versioning, a consistent ProblemDetails error shape, and statelessness.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q140</span>Caching strategies (Memory / Redis)</div>
+<div class="say"><b>How to answer</b>&#x27;Cache-aside with a TTL as the default, invalidate on write. In-memory is per-instance and fastest; Redis is shared and survives restarts. Guard against stampede with locking or early refresh.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q141</span>Logging vs monitoring</div>
+<div class="say"><b>How to answer</b>&#x27;Logging records discrete events with context for after-the-fact diagnosis. Monitoring continuously measures health metrics with dashboards and alerts for proactive detection. With tracing they&#x27;re the three pillars of observability.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q142</span>Unit testing approach (xUnit / NUnit)</div>
+<div class="say"><b>How to answer</b>&#x27;xUnit with Moq for doubles, Arrange-Act-Assert, testing behavior not implementation, one logical assertion focus per test. I complement unit tests with integration tests using WebApplicationFactory and Testcontainers for real DB behavior.&#x27;</div>
+<pre>[Fact]
+public async Task Returns_NotFound_When_Order_Missing() {
+    _repo.Setup(r =&gt; r.GetAsync(1)).ReturnsAsync((Order?)null);   // Arrange
+    var result = await _controller.Get(1);                        // Act
+    Assert.IsType&lt;NotFoundResult&gt;(result.Result);                 // Assert
+}</pre>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q143</span>Code review &amp; clean code best practices</div>
+<div class="say"><b>How to answer</b>&#x27;Small focused PRs, meaningful names, small single-purpose methods, guard clauses over deep nesting, no magic numbers, tests with the change. Reviews check correctness, readability, security and performance — and I automate style with analyzers so humans review substance.&#x27;</div>
+</div>
+<div class="qa">
+<div class="q"><span class="num">Q144</span>Difference between .NET Framework, .NET Core, and modern .NET (8/9/10)</div>
+<div class="say"><b>How to answer</b>&#x27;Framework is Windows-only legacy, frozen at 4.8. Core was the cross-platform rewrite. Modern .NET from 5 onward is the unified platform — one BCL, big yearly performance gains, LTS every two years. 8 and 10 are LTS, 9 is STS. New work targets modern .NET.&#x27;</div>
+</div>
+<a class="top" href="#top">↑ top</a>
+</main></body></html>
